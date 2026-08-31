@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import Foundation
-import HearMeNotCore
+import MicAwayCore
 
 @MainActor
 final class AppModel: ObservableObject {

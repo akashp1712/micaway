@@ -8,12 +8,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 @main
-struct HearMeNotApp: App {
+struct MicAwayApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel()
 
     var body: some Scene {
-        MenuBarExtra("Hear Me Not", systemImage: model.menuBarSymbol) {
+        MenuBarExtra("MicAway", systemImage: model.menuBarSymbol) {
             MenuBarContentView(model: model)
         }
         .menuBarExtraStyle(.window)

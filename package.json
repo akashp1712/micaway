@@ -1,5 +1,5 @@
 {
-  "name": "studio-kit",
+  "name": "micaway",
   "private": true,
   "scripts": {
     "build": "turbo build",

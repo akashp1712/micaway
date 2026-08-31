@@ -15,7 +15,7 @@ final class HeadphoneMotionService: NSObject, CMHeadphoneMotionManagerDelegate {
     private let manager = CMHeadphoneMotionManager()
     private let queue: OperationQueue = {
         let queue = OperationQueue()
-        queue.name = "com.akashpanchal.hearmenot.motion"
+        queue.name = "com.akashpanchal.micaway.motion"
         queue.qualityOfService = .userInteractive
         queue.maxConcurrentOperationCount = 1
         return queue

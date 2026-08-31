@@ -1,4 +1,4 @@
-# Hear Me Not for Mac
+# MicAway for Mac
 
 A tiny macOS menu-bar utility that uses AirPods head motion to decide whether speech is meant for the Mac.
 
@@ -9,7 +9,7 @@ A tiny macOS menu-bar utility that uses AirPods head motion to decide whether sp
 - Applies dwell plus hysteresis so quick glances do not flap the state.
 - Shows `Listening` and `Not for your Mac` in a minimal menu-bar popover.
 - Can mute the default input device when that device exposes Core Audio's mute property. This is opt-in and off by default.
-- Restores only a mute that Hear Me Not applied itself.
+- Restores only a mute that MicAway applied itself.
 
 The motion path is the product validation. Universal app compatibility will later require a signed virtual microphone; the prototype does not fake that capability.
 
@@ -20,7 +20,7 @@ Requirements: macOS 14+, Xcode Command Line Tools, and AirPods with dynamic head
 ```bash
 cd apps/mac
 ./scripts/build-app.sh
-open "dist/Hear Me Not.app"
+open "dist/MicAway.app"
 ```
 
 Grant Motion access when macOS asks. Put in your AirPods, open the menu-bar item, face the Mac, and choose **Calibrate**.

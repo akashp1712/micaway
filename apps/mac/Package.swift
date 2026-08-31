@@ -3,20 +3,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "HearMeNot",
+    name: "MicAway",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "HearMeNot", targets: ["HearMeNotApp"])
+        .executable(name: "MicAway", targets: ["MicAwayApp"])
     ],
     targets: [
         .target(
-            name: "HearMeNotCore",
-            path: "Sources/HearMeNotCore"
+            name: "MicAwayCore",
+            path: "Sources/MicAwayCore"
         ),
         .executableTarget(
-            name: "HearMeNotApp",
-            dependencies: ["HearMeNotCore"],
-            path: "Sources/HearMeNotApp",
+            name: "MicAwayApp",
+            dependencies: ["MicAwayCore"],
+            path: "Sources/MicAwayApp",
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("CoreAudio"),
@@ -24,9 +24,9 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "HearMeNotCoreTests",
-            dependencies: ["HearMeNotCore"],
-            path: "Tests/HearMeNotCoreTests"
+            name: "MicAwayCoreTests",
+            dependencies: ["MicAwayCore"],
+            path: "Tests/MicAwayCoreTests"
         )
     ]
 )

@@ -1,4 +1,4 @@
-name: Mac app
+name: MicAway for Mac
 
 on:
   push:
@@ -26,10 +26,10 @@ jobs:
       - name: Build release bundle
         run: bash scripts/build-app.sh
       - name: Package test build
-        run: ditto -c -k --sequesterRsrc --keepParent "dist/Hear Me Not.app" "dist/HearMeNot-macOS.zip"
+        run: ditto -c -k --sequesterRsrc --keepParent "dist/MicAway.app" "dist/MicAway-macOS.zip"
       - name: Upload test build
         uses: actions/upload-artifact@v4
         with:
-          name: HearMeNot-macOS
-          path: apps/mac/dist/HearMeNot-macOS.zip
+          name: MicAway-macOS
+          path: apps/mac/dist/MicAway-macOS.zip
           if-no-files-found: error

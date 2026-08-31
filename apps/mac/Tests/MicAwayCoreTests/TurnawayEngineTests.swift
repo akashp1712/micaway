@@ -1,5 +1,5 @@
 import XCTest
-@testable import HearMeNotCore
+@testable import MicAwayCore
 
 final class TurnawayEngineTests: XCTestCase {
     func testRequiresCalibration() {

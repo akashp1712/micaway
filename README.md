@@ -1,50 +1,39 @@
-# studio-kit
+# MicAway
 
-Reusable Turborepo starter for small product studios: **shared UI primitives**, **per-app themes**, **ops + skills routing**.
+**Look away. Mic away.**
 
-Not a visual brand. Evercall, OneCue, and the next app should fork this kit and **look different**.
+MicAway is an AirPods-aware microphone guard for macOS. It calibrates the direction of your Mac, watches relative head yaw locally, and pauses voice input when your attention turns toward someone else.
 
-## What's inside
+## Monorepo
 
-```
-apps/web                 marketing shell (:3001) — warm editorial demo theme
-apps/app                 product shell (:3000) — cool utility demo theme
-packages/design-system   shadcn-style primitives + BrandLogo slots
-packages/next-config     shared Next defaults
-packages/typescript-config
-ops/                     outreach · marketing · social · strategy
-.agents/skills/          landing system + interface craft
-docs/                    product / system / ship / theming
+```text
+apps/web   Minimal product landing page
+apps/mac   Native Swift menu-bar prototype
+packages   Shared web design system and configuration
+docs       Product and shipping notes
 ```
 
-## Theming caution
-
-Read [docs/04-THEMING.md](./docs/04-THEMING.md).
-
-Each app owns:
-
-- `styles/theme.css` — colors, radius, shadows
-- `lib/fonts.ts` — typefaces (web ≠ app in the demos on purpose)
-- `BrandLogo` title + `markPath`
-
-## Quick start
+## Web
 
 ```bash
 pnpm install
-pnpm dev          # web + app
+pnpm dev:web
 pnpm build
 ```
 
-## Fork a new product
+## Mac prototype
 
-1. Use as GitHub template (or copy the folder).
-2. Rename root `package.json` name + app metadata.
-3. Rewrite themes/fonts/brand for **that** product only.
-4. Fill `docs/01-PRODUCT.md` and wire Vercel per [docs/03-SHIP.md](./docs/03-SHIP.md).
-5. Symlink money / Corey / ams skills as needed — see [ops/SKILLS.md](./ops/SKILLS.md).
+Requires macOS 14+, Xcode Command Line Tools, and compatible AirPods with dynamic head tracking.
 
-## Skills
+```bash
+cd apps/mac
+swift test
+./scripts/build-app.sh
+open "dist/MicAway.app"
+```
 
-Bundled: `personal-landing-system`, `make-interfaces-feel-better`.
+The current hardware spike can mute the default input only when that device exposes Core Audio's mute property. Universal compatibility will require a signed virtual microphone later.
 
-Install money/ams/Corey from their repos; don't vendor the entire packs into every fork.
+## Privacy
+
+Motion processing stays on the Mac. The prototype does not record, store, or transcribe audio.

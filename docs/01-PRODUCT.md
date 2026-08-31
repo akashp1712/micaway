@@ -1,22 +1,28 @@
 # 01 — Product
 
-> Fill this when you fork the kit into a real product.
-
 ## One-liner
 
-_What does this do for whom, in one sentence?_
+MicAway uses AirPods head tracking to keep side conversations out of Mac voice apps.
 
-## ICP
+## Product promise
 
-- Who:
-- Job-to-be-done:
-- Geography / channel:
+**Look away. Mic away.** Face the Mac again and continue naturally.
 
-## Pilot KPI
+## Initial user
 
-- Metric:
-- Threshold to expand:
+- People who dictate heavily with ChatGPT, Claude, Cursor, Wispr Flow, or similar tools
+- People working around partners, children, colleagues, or flatmates
+- Mac users with compatible AirPods who need a fast, local speech boundary
 
-## Non-goals (now)
+## Validation target
 
--
+- A side conversation is gated reliably after a deliberate head turn
+- A quick glance does not trigger the gate
+- Returning to the calibrated Mac-facing zone feels immediate
+- Disconnects and manual mute state fail safely
+
+## Non-goals for the hardware spike
+
+- Transcription or rewriting
+- Meeting auto-unmute
+- Claiming universal microphone compatibility before a virtual audio device exists

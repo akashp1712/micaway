@@ -1,4 +1,4 @@
-import HearMeNotCore
+import MicAwayCore
 import SwiftUI
 
 struct MenuBarContentView: View {
@@ -18,7 +18,7 @@ struct MenuBarContentView: View {
                 Circle()
                     .fill(signalColor)
                     .frame(width: 8, height: 8)
-                Text("hear me not")
+                Text("micaway")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                 Spacer()
                 Text("\(Int(model.relativeYawDegrees.rounded()))°")
@@ -38,7 +38,7 @@ struct MenuBarContentView: View {
             Divider()
                 .padding(.vertical, 20)
 
-            Toggle("Turnaway guard", isOn: $model.guardEnabled)
+            Toggle("MicAway guard", isOn: $model.guardEnabled)
                 .toggleStyle(.switch)
 
             Toggle("Mute default input", isOn: $model.microphoneGateEnabled)
