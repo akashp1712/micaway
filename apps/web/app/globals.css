@@ -6,7 +6,88 @@
   --font-display: var(--font-display), ui-serif, Georgia, serif;
 }
 
-.sk-display {
-  font-family: var(--font-display);
-  letter-spacing: -0.02em;
+* { box-sizing: border-box; }
+html { background: #f8f8f5; }
+body { margin: 0; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+
+.site-shell { width: min(100%, 1320px); margin: 0 auto; padding: 26px 44px 28px; color: #171714; }
+.site-nav, .demo-topline, .demo-control, footer { display: flex; align-items: center; justify-content: space-between; }
+.site-nav { font-size: 13px; letter-spacing: -0.01em; }
+.wordmark { font-size: 16px; font-weight: 650; letter-spacing: -0.055em; }
+.wordmark-dot, .signal { color: #43a56d; }
+.nav-link { color: #6c6c64; transition: color 180ms ease; }
+.nav-link:hover { color: #171714; }
+
+.hero { padding: clamp(92px, 16vw, 210px) 0 clamp(94px, 14vw, 184px); max-width: 920px; }
+.eyebrow, .demo-label { color: #75756d; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.eyebrow { display: flex; gap: 8px; align-items: center; margin: 0 0 26px; }
+.signal { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #43a56d; }
+.hero h1 { margin: 0; font-family: var(--font-display); font-size: clamp(52px, 8.1vw, 118px); font-weight: 430; letter-spacing: -0.072em; line-height: .94; }
+.hero-copy { max-width: 460px; margin: 38px 0 0; color: #6c6c64; font-size: 18px; letter-spacing: -0.026em; line-height: 1.48; }
+.hero-actions { display: flex; align-items: center; gap: 18px; margin-top: 34px; }
+.button { display: inline-flex; border-radius: 999px; padding: 12px 17px; font-size: 13px; font-weight: 570; transition: transform 180ms ease, background 180ms ease; }
+.button:hover { transform: translateY(-1px); }
+.button-primary { background: #181815; color: #fff; }
+.quiet-note { color: #898980; font-size: 12px; }
+
+.demo-section { padding: 0 0 clamp(116px, 15vw, 210px); }
+.demo-label { display: flex; gap: 14px; margin: 0 0 18px; }
+.demo-label span { color: #b2b2aa; }
+.demo-card { border: 1px solid #dfdfd8; background: #fff; transition: border-color 300ms ease, background 300ms ease; }
+.demo-topline { border-bottom: 1px solid #e6e6df; padding: 15px 18px; font-size: 12px; }
+.demo-app { color: #74746d; }
+.demo-state { display: flex; align-items: center; gap: 7px; font-weight: 550; }
+.demo-state i { width: 7px; height: 7px; border-radius: 100%; background: #43a56d; display: block; }
+.is-aside { background: #fafaf7; border-color: #d2d2ca; }
+.is-aside .demo-state { color: #73736b; }
+.is-aside .demo-state i { background: #a5a59b; }
+
+.demo-body { display: grid; grid-template-columns: .82fr 1.18fr; min-height: 382px; }
+.head-scene { position: relative; display: grid; place-items: center; overflow: hidden; border-right: 1px solid #e6e6df; background: #f2f2ed; }
+.head { position: relative; width: 98px; height: 122px; border: 1px solid #20201d; border-radius: 55% 55% 46% 46%; background: #f8f8f5; transform: rotate(0deg); transition: transform 500ms cubic-bezier(.2,.8,.2,1); }
+.head::before { content: ""; position: absolute; top: 28px; left: 21px; width: 52px; height: 9px; border-top: 1px solid #20201d; border-radius: 50%; }
+.head::after { content: ""; position: absolute; bottom: -49px; left: 13px; width: 72px; height: 55px; border: 1px solid #20201d; border-bottom: 0; border-radius: 48px 48px 0 0; background: #f8f8f5; }
+.is-aside .head { transform: rotate(-29deg); }
+.direction { position: absolute; top: 49%; color: #a3a39a; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; transition: color 250ms ease; }
+.direction-left { left: 9%; }
+.direction-right { right: 9%; }
+.is-aside .direction-left, .is-listening .direction-right { color: #252522; font-weight: 650; }
+.head-caption { position: absolute; bottom: 38px; font-size: 13px; letter-spacing: -.02em; }
+
+.transcript { padding: 42px clamp(25px, 5vw, 66px); align-self: center; }
+.transcript-label { margin: 0 0 14px; color: #94948a; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.captured { max-width: 450px; margin: 0; font-size: clamp(21px, 2.8vw, 39px); letter-spacing: -.05em; line-height: 1.05; }
+.excluded { margin: 24px 0 0; color: #a2a299; font-size: 15px; opacity: 0; transform: translateY(5px); transition: opacity 300ms ease, transform 300ms ease; }
+.excluded.visible { opacity: 1; transform: none; }
+.excluded span { color: #43a56d; }
+.demo-control { border-top: 1px solid #e6e6df; padding: 15px 18px; }
+.demo-control p { margin: 0; color: #76766e; font-size: 12px; }
+.demo-control button { border: 0; background: transparent; cursor: pointer; color: #1c1c18; font-size: 12px; font-weight: 650; }
+
+.principle { max-width: 910px; padding-bottom: clamp(116px, 16vw, 220px); }
+.principle-copy { max-width: 760px; margin: 28px 0 72px; font-family: var(--font-display); font-size: clamp(37px, 5.2vw, 72px); letter-spacing: -.06em; line-height: .98; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #deded7; }
+.steps > div { padding: 17px 20px 0 0; border-right: 1px solid #deded7; }
+.steps > div:not(:first-child) { padding-left: 20px; }
+.steps > div:last-child { border-right: 0; }
+.steps span { color: #9b9b92; font-size: 11px; }
+.steps p { margin: 35px 0 0; font-size: 15px; letter-spacing: -.025em; line-height: 1.35; }
+footer { border-top: 1px solid #deded7; padding-top: 18px; color: #818178; font-size: 11px; }
+
+@media (max-width: 700px) {
+  .site-shell { padding: 22px 20px; }
+  .hero { padding: 106px 0 112px; }
+  .hero h1 { font-size: clamp(49px, 14vw, 80px); }
+  .hero-copy { font-size: 16px; margin-top: 31px; }
+  .hero-actions { align-items: flex-start; flex-direction: column; gap: 13px; }
+  .demo-body { grid-template-columns: 1fr; }
+  .head-scene { min-height: 260px; border-right: 0; border-bottom: 1px solid #e6e6df; }
+  .transcript { min-height: 260px; padding: 36px 28px; }
+  .principle-copy { margin-bottom: 48px; }
+  .steps { grid-template-columns: 1fr; }
+  .steps > div, .steps > div:not(:first-child) { display: flex; justify-content: space-between; padding: 16px 0; border-right: 0; border-bottom: 1px solid #deded7; }
+  .steps p { margin: 0; text-align: right; }
+  footer { align-items: flex-start; flex-direction: column; gap: 7px; }
 }
