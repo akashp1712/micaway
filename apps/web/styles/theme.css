@@ -1,43 +1,38 @@
-/*
-  Product theme: WEB (marketing demo)
-  Fork rule: rewrite this file + lib/fonts.ts + brand title/mark.
-  Do not reuse these tokens for the product app — keep surfaces distinct.
-*/
+/* Product theme: Hear Me Not */
 :root {
-  --background: oklch(0.975 0.012 75);
-  --foreground: oklch(0.22 0.02 40);
-  --card: oklch(0.995 0.006 75);
-  --card-foreground: oklch(0.22 0.02 40);
-  --popover: oklch(0.995 0.006 75);
-  --popover-foreground: oklch(0.22 0.02 40);
-  --primary: oklch(0.38 0.08 35);
-  --primary-foreground: oklch(0.98 0.01 75);
-  --secondary: oklch(0.94 0.02 75);
-  --secondary-foreground: oklch(0.28 0.03 40);
-  --muted: oklch(0.94 0.015 75);
-  --muted-foreground: oklch(0.45 0.03 45);
-  --accent: oklch(0.93 0.03 70);
-  --accent-foreground: oklch(0.28 0.04 35);
-  --border: oklch(0.88 0.02 75);
-  --input: oklch(0.88 0.02 75);
-  --ring: oklch(0.55 0.06 40);
-  --brand: oklch(0.45 0.1 35);
-  --brand-foreground: oklch(0.98 0.01 75);
-  --radius: 0.75rem;
-  --shadow-elevation:
-    0 1px 2px rgba(60, 40, 20, 0.05), 0 8px 24px rgba(60, 40, 20, 0.08);
+  --background: oklch(0.975 0.003 95);
+  --foreground: oklch(0.2 0.004 95);
+  --card: oklch(0.995 0.002 95);
+  --card-foreground: oklch(0.2 0.004 95);
+  --popover: oklch(0.995 0.002 95);
+  --popover-foreground: oklch(0.2 0.004 95);
+  --primary: oklch(0.2 0.004 95);
+  --primary-foreground: oklch(0.99 0.002 95);
+  --secondary: oklch(0.94 0.003 95);
+  --secondary-foreground: oklch(0.2 0.004 95);
+  --muted: oklch(0.94 0.003 95);
+  --muted-foreground: oklch(0.48 0.004 95);
+  --accent: oklch(0.92 0.04 150);
+  --accent-foreground: oklch(0.2 0.004 95);
+  --border: oklch(0.88 0.003 95);
+  --input: oklch(0.88 0.003 95);
+  --ring: oklch(0.58 0.09 150);
+  --brand: oklch(0.58 0.09 150);
+  --brand-foreground: oklch(0.99 0.002 95);
+  --radius: 0rem;
+  --shadow-elevation: none;
 }
 
 .dark {
-  --background: oklch(0.18 0.02 40);
-  --foreground: oklch(0.96 0.01 75);
-  --card: oklch(0.22 0.02 40);
-  --card-foreground: oklch(0.96 0.01 75);
-  --primary: oklch(0.78 0.08 55);
-  --primary-foreground: oklch(0.18 0.02 40);
-  --brand: oklch(0.78 0.08 55);
-  --brand-foreground: oklch(0.18 0.02 40);
-  --muted: oklch(0.26 0.02 40);
-  --muted-foreground: oklch(0.72 0.02 70);
-  --border: oklch(0.32 0.02 40);
+  --background: oklch(0.17 0.004 95);
+  --foreground: oklch(0.96 0.002 95);
+  --card: oklch(0.21 0.004 95);
+  --card-foreground: oklch(0.96 0.002 95);
+  --primary: oklch(0.95 0.002 95);
+  --primary-foreground: oklch(0.17 0.004 95);
+  --brand: oklch(0.67 0.1 150);
+  --brand-foreground: oklch(0.17 0.004 95);
+  --muted: oklch(0.26 0.004 95);
+  --muted-foreground: oklch(0.72 0.004 95);
+  --border: oklch(0.32 0.004 95);
 }
