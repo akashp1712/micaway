@@ -1,0 +1,31 @@
+{
+  "name": "studio-kit",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev --filter=app --filter=web",
+    "dev:app": "turbo dev --filter=app",
+    "dev:web": "turbo dev --filter=web",
+    "lint": "ultracite check",
+    "lint:fix": "ultracite fix",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "typecheck": "turbo typecheck",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.6",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^25.3.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.2.0",
+    "turbo": "^2.8.14",
+    "typescript": "^5.9.3",
+    "ultracite": "7.2.5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.31.0",
+  "type": "module"
+}

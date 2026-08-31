@@ -1,0 +1,12 @@
+@import "@repo/design-system/styles/globals.css";
+@import "../styles/theme.css";
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+}
+
+.sk-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
