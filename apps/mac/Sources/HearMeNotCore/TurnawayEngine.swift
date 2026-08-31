@@ -1,0 +1,122 @@
+import Foundation
+
+public enum IntentState: String, Equatable, Sendable {
+    case needsCalibration
+    case listening
+    case turnaway
+}
+
+public struct TurnawayConfiguration: Equatable, Sendable {
+    public var enterThresholdDegrees: Double
+    public var exitThresholdDegrees: Double
+    public var enterDwellSeconds: TimeInterval
+    public var exitDwellSeconds: TimeInterval
+
+    public init(
+        enterThresholdDegrees: Double = 28,
+        exitThresholdDegrees: Double = 16,
+        enterDwellSeconds: TimeInterval = 0.24,
+        exitDwellSeconds: TimeInterval = 0.34
+    ) {
+        precondition(enterThresholdDegrees > exitThresholdDegrees)
+        precondition(exitThresholdDegrees >= 0)
+        precondition(enterDwellSeconds >= 0 && exitDwellSeconds >= 0)
+        self.enterThresholdDegrees = enterThresholdDegrees
+        self.exitThresholdDegrees = exitThresholdDegrees
+        self.enterDwellSeconds = enterDwellSeconds
+        self.exitDwellSeconds = exitDwellSeconds
+    }
+}
+
+public struct IntentReading: Equatable, Sendable {
+    public let state: IntentState
+    public let relativeYawDegrees: Double
+
+    public init(state: IntentState, relativeYawDegrees: Double) {
+        self.state = state
+        self.relativeYawDegrees = relativeYawDegrees
+    }
+}
+
+public struct TurnawayEngine: Sendable {
+    private enum Candidate: Sendable {
+        case turnaway(since: TimeInterval)
+        case listening(since: TimeInterval)
+    }
+
+    public let configuration: TurnawayConfiguration
+    public private(set) var state: IntentState = .needsCalibration
+    public private(set) var baselineYawRadians: Double?
+    private var candidate: Candidate?
+
+    public init(configuration: TurnawayConfiguration = .init()) {
+        self.configuration = configuration
+    }
+
+    @discardableResult
+    public mutating func calibrate(yawRadians: Double) -> IntentReading {
+        baselineYawRadians = Self.normalized(yawRadians)
+        state = .listening
+        candidate = nil
+        return IntentReading(state: state, relativeYawDegrees: 0)
+    }
+
+    public mutating func reset() {
+        baselineYawRadians = nil
+        state = .needsCalibration
+        candidate = nil
+    }
+
+    public mutating func update(
+        yawRadians: Double,
+        timestamp: TimeInterval
+    ) -> IntentReading {
+        guard let baselineYawRadians else {
+            return IntentReading(state: .needsCalibration, relativeYawDegrees: 0)
+        }
+
+        let relativeRadians = Self.normalized(yawRadians - baselineYawRadians)
+        let relativeDegrees = relativeRadians * 180 / .pi
+        let magnitude = abs(relativeDegrees)
+
+        switch state {
+        case .needsCalibration:
+            state = .listening
+            candidate = nil
+
+        case .listening:
+            if magnitude >= configuration.enterThresholdDegrees {
+                if case let .turnaway(since) = candidate {
+                    if timestamp - since >= configuration.enterDwellSeconds {
+                        state = .turnaway
+                        candidate = nil
+                    }
+                } else {
+                    candidate = .turnaway(since: timestamp)
+                }
+            } else {
+                candidate = nil
+            }
+
+        case .turnaway:
+            if magnitude <= configuration.exitThresholdDegrees {
+                if case let .listening(since) = candidate {
+                    if timestamp - since >= configuration.exitDwellSeconds {
+                        state = .listening
+                        candidate = nil
+                    }
+                } else {
+                    candidate = .listening(since: timestamp)
+                }
+            } else {
+                candidate = nil
+            }
+        }
+
+        return IntentReading(state: state, relativeYawDegrees: relativeDegrees)
+    }
+
+    private static func normalized(_ radians: Double) -> Double {
+        atan2(sin(radians), cos(radians))
+    }
+}

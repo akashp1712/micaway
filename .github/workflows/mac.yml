@@ -1,0 +1,27 @@
+name: Mac app
+
+on:
+  push:
+    paths:
+      - "apps/mac/**"
+      - ".github/workflows/mac.yml"
+  pull_request:
+    paths:
+      - "apps/mac/**"
+      - ".github/workflows/mac.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: apps/mac
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test intent engine
+        run: swift test
+      - name: Build release bundle
+        run: bash scripts/build-app.sh
