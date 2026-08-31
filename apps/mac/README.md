@@ -19,21 +19,13 @@ Requirements: macOS 14+, Xcode Command Line Tools, and AirPods with dynamic head
 
 ```bash
 cd apps/mac
-swift run HearMeNot
-```
-
-Grant Motion access when macOS asks. Put in your AirPods, open the menu-bar item, face the Mac, and choose **Calibrate**.
-
-## Build an app bundle
-
-```bash
-cd apps/mac
-chmod +x scripts/build-app.sh
 ./scripts/build-app.sh
 open "dist/Hear Me Not.app"
 ```
 
-The local bundle is unsigned. Signing, notarization, Sparkle updates, and the virtual microphone belong after the AirPods behavior passes the hardware test.
+Grant Motion access when macOS asks. Put in your AirPods, open the menu-bar item, face the Mac, and choose **Calibrate**.
+
+The local bundle is ad-hoc signed for testing. Developer ID signing, notarization, Sparkle updates, and the virtual microphone belong after the AirPods behavior passes the hardware test.
 
 ## Test
 

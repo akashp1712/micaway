@@ -13,5 +13,6 @@ rm -rf "$APP_PATH"
 mkdir -p "$APP_PATH/Contents/MacOS"
 cp "$BIN_PATH/HearMeNot" "$APP_PATH/Contents/MacOS/HearMeNot"
 cp "$APP_ROOT/Resources/Info.plist" "$APP_PATH/Contents/Info.plist"
+codesign --force --deep --sign - "$APP_PATH"
 
 echo "Built: $APP_PATH"
