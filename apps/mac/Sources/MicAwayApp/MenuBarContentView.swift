@@ -18,7 +18,7 @@ struct MenuBarContentView: View {
                 Circle()
                     .fill(signalColor)
                     .frame(width: 8, height: 8)
-                Text("micaway")
+                Text("MicAway")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                 Spacer()
                 Text("\(Int(model.relativeYawDegrees.rounded()))°")
@@ -38,10 +38,10 @@ struct MenuBarContentView: View {
             Divider()
                 .padding(.vertical, 20)
 
-            Toggle("MicAway guard", isOn: $model.guardEnabled)
+            Toggle("Turnaway guard", isOn: $model.guardEnabled)
                 .toggleStyle(.switch)
 
-            Toggle("Mute default input", isOn: $model.microphoneGateEnabled)
+            Toggle("Mute mic when turned away", isOn: $model.microphoneGateEnabled)
                 .toggleStyle(.switch)
                 .disabled(!model.microphoneGateAvailable)
                 .padding(.top, 10)
@@ -53,9 +53,13 @@ struct MenuBarContentView: View {
                 .padding(.top, 14)
 
             HStack(spacing: 8) {
-                Button("Calibrate") { model.calibrate() }
-                    .keyboardShortcut("r", modifiers: [.command])
-                    .disabled(!model.canCalibrate)
+                if model.canCalibrate {
+                    Button("Calibrate") { model.calibrate() }
+                        .keyboardShortcut("r", modifiers: [.command])
+                } else {
+                    Button("Retry") { model.retryMotion() }
+                        .keyboardShortcut("r", modifiers: [.command])
+                }
                 Spacer()
                 Button("Quit") { model.quit() }
                     .keyboardShortcut("q", modifiers: [.command])

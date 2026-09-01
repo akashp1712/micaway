@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title description">
+  <title id="title">MicAway</title>
+  <desc id="description">A microphone capsule whose top turns away.</desc>
+  <path fill="#171714" d="M20 29.5v7.25C20 43.52 25.48 49 32.25 49S44.5 43.52 44.5 36.75V29.5h4v7.25c0 8.29-6.24 15.12-14.25 16.06V58h8v4h-20v-4h8v-5.19C22.24 51.87 16 45.04 16 36.75V29.5h4Z"/>
+  <path fill="#171714" d="M24 25.2V36a8.25 8.25 0 0 0 16.5 0v-1.27L24 25.2Z"/>
+  <path fill="#43A56D" d="M27.25 20.14C28.57 17.62 31.15 16 34 16a8.25 8.25 0 0 1 8.25 8.25c0 1.45-.38 2.88-1.11 4.13L27.25 20.14Z"/>
+</svg>

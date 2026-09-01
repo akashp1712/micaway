@@ -207,3 +207,7 @@ packages/database/generated
 .claude/
 .cursor/
 skills-lock.json
+
+# Swift build output
+apps/mac/.build/
+apps/mac/.swiftpm/

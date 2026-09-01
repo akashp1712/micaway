@@ -1,4 +1,4 @@
-name: MicAway for Mac
+name: Mac app
 
 on:
   push:
@@ -25,11 +25,3 @@ jobs:
         run: swift test
       - name: Build release bundle
         run: bash scripts/build-app.sh
-      - name: Package test build
-        run: ditto -c -k --sequesterRsrc --keepParent "dist/MicAway.app" "dist/MicAway-macOS.zip"
-      - name: Upload test build
-        uses: actions/upload-artifact@v4
-        with:
-          name: MicAway-macOS
-          path: apps/mac/dist/MicAway-macOS.zip
-          if-no-files-found: error

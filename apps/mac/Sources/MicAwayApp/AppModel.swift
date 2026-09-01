@@ -12,17 +12,24 @@ final class AppModel: ObservableObject {
     @Published var guardEnabled = true {
         didSet { guardEnabledChanged() }
     }
-    @Published var microphoneGateEnabled = false {
-        didSet { microphoneGateEnabledChanged() }
+    @Published var microphoneGateEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(
+                microphoneGateEnabled,
+                forKey: Self.microphoneGateDefaultsKey
+            )
+            microphoneGateEnabledChanged()
+        }
     }
 
     private var latestYawRadians: Double?
     private var engine = TurnawayEngine()
     private let motion = HeadphoneMotionService()
-    private let microphone = DefaultInputMuteController()
+    private let microphone = InputMuteController()
+    private static let microphoneGateDefaultsKey = "microphoneGateEnabled"
 
     var canCalibrate: Bool { latestYawRadians != nil }
-    var microphoneGateAvailable: Bool { microphone.canMuteDefaultInput() }
+    var microphoneGateAvailable: Bool { microphone.canMuteInput() }
 
     var statusTitle: String {
         switch intentState {
@@ -52,6 +59,10 @@ final class AppModel: ObservableObject {
     }
 
     init() {
+        microphoneGateEnabled = UserDefaults.standard.object(
+            forKey: Self.microphoneGateDefaultsKey
+        ) as? Bool ?? true
+
         motion.onStatus = { [weak self] status in
             self?.motionStatus = status
             switch status {
@@ -74,6 +85,10 @@ final class AppModel: ObservableObject {
         let reading = engine.calibrate(yawRadians: latestYawRadians)
         apply(reading)
         message = "Forward set. The boundary is ready."
+    }
+
+    func retryMotion() {
+        motion.retry()
     }
 
     func quit() {
