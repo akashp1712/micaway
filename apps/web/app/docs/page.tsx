@@ -4,7 +4,7 @@ export default function DocsPage() {
   return (
     <main className="mx-auto max-w-2xl space-y-6 px-6 py-16">
       <Link
-        className="text-sm text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground text-sm hover:text-foreground"
         href="/"
       >
         ← Home
@@ -26,7 +26,7 @@ export default function DocsPage() {
           <code className="text-foreground">BrandLogo</code>.
         </li>
       </ol>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Kit UI primitives stay shared. Visual identity must not.
       </p>
     </main>

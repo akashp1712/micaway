@@ -4,10 +4,10 @@
 
 <h1 align="center">MicAway</h1>
 
-<p align="center"><strong>Turn your head. Mute the mic.</strong></p>
+<p align="center"><strong>Not every word is a prompt.</strong></p>
 
 <p align="center">
-  A free, open-source macOS utility that uses AirPods head tracking to keep side conversations out of voice apps.
+  The open-source attention layer for continuous voice on macOS. Look away to keep a side conversation out; face your Mac to continue.
 </p>
 
 <p align="center">

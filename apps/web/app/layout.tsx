@@ -4,10 +4,21 @@ import type { Metadata } from "next";
 import { fonts } from "@/lib/fonts";
 import "./globals.css";
 
+const siteUrl = "https://micaway.akashpanchal.com";
+
 export const metadata: Metadata = {
-  title: "MicAway — Turn your head. Mute the mic.",
+  metadataBase: new URL(siteUrl),
+  title: "MicAway — Not every word is a prompt",
   description:
-    "Open-source, AirPods-aware microphone privacy for macOS. Face your Mac to dictate; turn away to mute.",
+    "The missing mute gesture for continuous voice agents. Look away to keep side conversations out; face your Mac to continue.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    url: siteUrl,
+    siteName: "MicAway",
+    type: "website",
+  },
   icons: {
     icon: "/brand/micaway-app-icon.png",
     apple: "/brand/micaway-app-icon.png",

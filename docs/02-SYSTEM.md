@@ -6,8 +6,6 @@
 apps/web     marketing / public site
 apps/app     authenticated product UI
 packages/    design-system, next-config, typescript-config
-ops/         outreach, marketing, social, strategy
-.agents/     project skills (UI + landing + money/ams links)
 docs/        product / system / ship / theming
 ```
 
