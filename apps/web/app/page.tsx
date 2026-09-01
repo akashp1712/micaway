@@ -5,7 +5,7 @@ import { AttentionDemo } from "@/components/attention-demo";
 import { DownloadCount } from "@/components/download-count";
 
 const githubUrl = "https://github.com/akashp1712/micaway";
-const releaseUrl = `${githubUrl}/releases/latest`;
+const downloadUrl = "/api/download";
 
 const voiceApps = [
   {
@@ -58,12 +58,7 @@ export default function HomePage() {
           <a href={githubUrl} rel="noreferrer" target="_blank">
             GitHub
           </a>
-          <a
-            className="nav-download"
-            href={releaseUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
+          <a className="nav-download" href={downloadUrl}>
             Download
           </a>
         </div>
@@ -85,12 +80,7 @@ export default function HomePage() {
           your machine — without ever hearing you.
         </p>
         <div className="hero-actions">
-          <a
-            className="button button-signal"
-            href={releaseUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
+          <a className="button button-signal" href={downloadUrl}>
             <Download aria-hidden="true" /> Download for Mac
           </a>
           <a
@@ -180,12 +170,7 @@ export default function HomePage() {
         <p className="install-note">
           Unsigned Apple-silicon build · macOS 14+ · <DownloadCount /> downloads
         </p>
-        <a
-          className="button button-signal"
-          href={releaseUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
+        <a className="button button-signal" href={downloadUrl}>
           <Download aria-hidden="true" /> Get MicAway
         </a>
       </section>
