@@ -74,7 +74,20 @@ final class StatusItemController {
             popover.performClose(sender)
             return
         }
-        popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
-        popover.contentViewController?.view.window?.makeKey()
+        showPopover()
+    }
+
+    /// Force the controls on screen regardless of whether the menu-bar icon is
+    /// currently visible. On a notched/crowded bar or inside a full-screen app,
+    /// the status item can be drawn to a hidden menu bar; re-launching MicAway
+    /// (which fires applicationShouldHandleReopen) routes here so the user can
+    /// always reach the UI.
+    func showPopover() {
+        guard let button = statusItem.button else { return }
+        NSApp.activate(ignoringOtherApps: true)
+        if !popover.isShown {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        }
+        popover.contentViewController?.view.window?.makeKeyAndOrderFront(nil)
     }
 }

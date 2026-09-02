@@ -16,6 +16,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         model?.prepareForTermination()
     }
+
+    // Re-launching MicAway while it is already running (double-click in
+    // /Applications or Spotlight) reveals the controls — the reliable way to
+    // reach the UI when the menu-bar icon is hidden behind the notch or a
+    // full-screen Space.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        statusItemController?.showPopover()
+        return true
+    }
 }
 
 @main
