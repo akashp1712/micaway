@@ -14,15 +14,24 @@ A tiny, open-source macOS menu-bar utility that uses AirPods head motion to deci
 
 Most physical Mac microphones expose a system mute switch. A voice app using a virtual or otherwise non-mutable input may still require a MicAway virtual microphone in a future release.
 
-## Run on a Mac
+## Build & run
 
-Requirements: macOS 14+, Xcode Command Line Tools, and AirPods with dynamic head tracking.
+Requirements: macOS 14+, Xcode Command Line Tools. AirPods with dynamic head
+tracking (AirPods Pro 1/2, AirPods 3/4, AirPods Max) enable turn-away muting;
+without them you can still mute manually.
 
 ```bash
 cd apps/mac
-./scripts/build-app.sh
-open "dist/MicAway.app"
+./scripts/build-app.sh      # universal arm64 + x86_64 .app in dist/
+open dist/MicAway.app
 ```
+
+The build compiles directly with `swiftc` and `lipo` (no SwiftPM), so it works
+even when a Command Line Tools update leaves `swift build` broken with
+`Invalid manifest ... PackageDescription.Package.__allocating_init`. If you
+have a healthy toolchain or full Xcode, `swift build` / `swift test` also work.
+
+**Manual mute:** toggle it from the menu-bar popover or press **⌥⌘M** anywhere.
 
 Grant Motion access when macOS asks. Put in your AirPods, open the menu-bar item, face the Mac, and choose **Calibrate**.
 
@@ -42,7 +51,9 @@ Repeat after changing the voice app's microphone, swapping AirPods, disconnectin
 
 ```bash
 cd apps/mac
-swift test
+./scripts/test.sh
 ```
+Runs the swift-testing suite via SwiftPM when available, otherwise a standalone
+`swiftc`-compiled smoke test of the intent engine and mute logic.
 
 The intent engine is kept free of AppKit and Core Motion so its thresholds, timing, and angle wrapping can be tested deterministically.
