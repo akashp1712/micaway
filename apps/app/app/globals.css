@@ -1,7 +1,0 @@
-@import "@repo/design-system/styles/globals.css";
-@import "../styles/theme.css";
-
-@theme inline {
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono), ui-monospace, monospace;
-}

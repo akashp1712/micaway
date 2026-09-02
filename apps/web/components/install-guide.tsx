@@ -23,7 +23,7 @@ export function InstallGuide() {
           <div>
             <strong>Move it to Applications</strong>
             <p>
-              Download the Apple-silicon release, unzip it, then drag{" "}
+              Download the universal release, unzip it, then drag{" "}
               <code>MicAway.app</code> into Applications.
             </p>
           </div>
@@ -93,7 +93,7 @@ export function InstallGuide() {
               Wear compatible AirPods, allow Motion when macOS asks, face your
               Mac, and calibrate once.
             </p>
-            <div aria-label="MicAway permissions" className="permission-guide">
+            <div className="permission-guide">
               <span>
                 <Check aria-hidden="true" /> Motion required
               </span>

@@ -3,7 +3,7 @@ import { DM_Sans, Instrument_Serif } from "next/font/google";
 
 /**
  * Marketing site fonts — replace when forking a product.
- * Deliberately different from apps/app so surfaces don't look cloned.
+ * Shared font configuration for the MicAway website.
  */
 const sans = DM_Sans({
   subsets: ["latin"],

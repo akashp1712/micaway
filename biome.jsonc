@@ -17,12 +17,10 @@
       "!packages/design-system/components/ui",
       "!packages/design-system/lib",
       "!packages/design-system/hooks",
-      "!apps/app/components/ui",
       "!**/generated",
       "!**/.next",
       "!**/node_modules",
-      "!wiki/_generated",
-      "!docs"
+      "!wiki/_generated"
     ]
   }
 }

@@ -139,7 +139,6 @@ cd apps/mac
 ```text
 apps/mac/   Swift menu-bar app, motion tracking, and tests
 apps/web/   MicAway landing page
-docs/       Product and engineering notes
 ```
 
 ## Known limits

@@ -2,8 +2,7 @@ import { cn } from "@repo/design-system/lib/utils";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 /**
- * Kit default font. Products SHOULD override in apps/*/lib/fonts.ts
- * so Evercall / OneCue / next app don't share the same face.
+ * Shared fallback font configuration for product surfaces.
  */
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],

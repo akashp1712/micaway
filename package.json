@@ -3,8 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev --filter=app --filter=web",
-    "dev:app": "turbo dev --filter=app",
+    "dev": "turbo dev --filter=web",
     "dev:web": "turbo dev --filter=web",
     "lint": "ultracite check",
     "lint:fix": "ultracite fix",
