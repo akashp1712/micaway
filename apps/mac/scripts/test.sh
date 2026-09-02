@@ -18,7 +18,7 @@ BUILD_DIR="$APP_ROOT/.build/tests"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
-xcrun swiftc -O -target "$target" -parse-as-library \
+xcrun swiftc -O -wmo -target "$target" -parse-as-library \
   -module-name MicAwayCore \
   -emit-module -emit-module-path "$BUILD_DIR/MicAwayCore.swiftmodule" \
   -emit-object -o "$BUILD_DIR/MicAwayCore.o" \

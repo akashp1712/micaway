@@ -31,6 +31,23 @@ check(engine.update(yawRadians: degrees(10), timestamp: 0.5).state == .turnaway,
 check(engine.update(yawRadians: degrees(10), timestamp: 0.85).state == .listening,
       "engine exits turnaway after exit dwell")
 
+// MuteResolver checks
+check(MuteResolver.shouldMute(manualMuteEngaged: true, guardEnabled: false,
+                              microphoneGateEnabled: false, intentState: .listening),
+      "manual mute forces mute regardless of gates")
+check(MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: true,
+                              microphoneGateEnabled: true, intentState: .turnaway),
+      "turnaway mutes when guard + gate on")
+check(!MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: true,
+                               microphoneGateEnabled: true, intentState: .listening),
+      "listening does not mute")
+check(!MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: false,
+                               microphoneGateEnabled: true, intentState: .turnaway),
+      "guard off suppresses motion mute")
+check(!MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: true,
+                               microphoneGateEnabled: false, intentState: .turnaway),
+      "gate off suppresses motion mute")
+
 if failures == 0 {
     print("ALL PASS")
     exit(0)
