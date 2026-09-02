@@ -148,6 +148,11 @@ final class AppModel: ObservableObject {
             }
         } catch {
             message = error.localizedDescription
+            // Never let the menu-bar icon claim the mic is muted when the mute
+            // actually failed (e.g. ⌥⌘M pressed with no mutable input device).
+            if manualMuteEngaged {
+                manualMuteEngaged = false
+            }
         }
     }
 

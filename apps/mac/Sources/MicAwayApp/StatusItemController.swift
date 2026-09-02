@@ -9,10 +9,15 @@ final class StatusItemController {
     private let popover: NSPopover
     private var cancellables = Set<AnyCancellable>()
     private var hotKey: GlobalHotKey?
+    private var lastSymbol: String?
 
     init(model: AppModel) {
         self.model = model
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // A stable identity so the user can ⌘-drag the icon to a visible slot
+        // (e.g. out from behind the notch on a crowded menu bar) and have macOS
+        // remember that position across launches.
+        statusItem.autosaveName = "com.akashpanchal.micaway.statusitem"
 
         popover = NSPopover()
         popover.behavior = .transient
@@ -41,18 +46,25 @@ final class StatusItemController {
 
     private func updateButtonImage() {
         guard let button = statusItem.button else { return }
-        if let image = NSImage(
-            systemSymbolName: model.menuBarSymbol,
-            accessibilityDescription: model.statusTitle
-        ) {
-            image.isTemplate = true
-            button.image = image
-            button.title = ""
-        } else {
-            // Guarantee the item is never invisible if a symbol name is
-            // unavailable on this macOS version.
-            button.image = nil
-            button.title = "Mic"
+
+        // The model publishes on every head-yaw sample; only touch AppKit when
+        // the glyph actually changes to avoid rebuilding the image each tick.
+        let symbol = model.menuBarSymbol
+        if symbol != lastSymbol {
+            lastSymbol = symbol
+            if let image = NSImage(
+                systemSymbolName: symbol,
+                accessibilityDescription: model.statusTitle
+            ) {
+                image.isTemplate = true
+                button.image = image
+                button.title = ""
+            } else {
+                // Guarantee the item is never invisible if a symbol name is
+                // unavailable on this macOS version.
+                button.image = nil
+                button.title = "Mic"
+            }
         }
         button.setAccessibilityLabel(model.statusTitle)
     }
