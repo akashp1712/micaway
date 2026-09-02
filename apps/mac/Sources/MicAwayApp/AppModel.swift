@@ -99,8 +99,8 @@ final class AppModel: ObservableObject {
                 self?.message = reason
             }
         }
-        motion.onYaw = { [weak self] yaw in
-            self?.ingest(yaw: yaw)
+        motion.onYaw = { [weak self] yaw, isNewReferenceFrame in
+            self?.ingest(yaw: yaw, isNewReferenceFrame: isNewReferenceFrame)
         }
         motion.start()
     }
@@ -121,10 +121,26 @@ final class AppModel: ObservableObject {
         NSApplication.shared.terminate(nil)
     }
 
-    private func ingest(yaw: Double) {
+    private func ingest(yaw: Double, isNewReferenceFrame: Bool) {
         latestYawRadians = yaw
         objectWillChange.send()
         guard engine.state != .needsCalibration else { return }
+
+        if isNewReferenceFrame {
+            // The motion stream restarted (e.g. AirPods switched Bluetooth
+            // profile when a call grabbed the mic), so CoreMotion gave us a new
+            // yaw reference frame. Re-anchor forward to the current head
+            // position instead of reading the origin jump as a turn-away.
+            // Tradeoff: this fails open — if a restart lands while the user is
+            // genuinely turned away, "forward" is redefined to that pose until
+            // the next Calibrate. That is preferable to a false mute and self-
+            // heals; it never produces a stuck state (reanchor always yields a
+            // valid listening baseline).
+            apply(engine.reanchor(yawRadians: yaw))
+            message = "Head reference re-centered after an AirPods reconnect."
+            return
+        }
+
         apply(engine.update(yawRadians: yaw, timestamp: ProcessInfo.processInfo.systemUptime))
     }
 

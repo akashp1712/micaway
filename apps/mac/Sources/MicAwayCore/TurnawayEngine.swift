@@ -67,6 +67,23 @@ public struct TurnawayEngine: Sendable {
         candidate = nil
     }
 
+    /// Re-anchors the calibrated forward to a new motion reference frame.
+    ///
+    /// `CMHeadphoneMotionManager` captures a fresh yaw origin every time the
+    /// motion stream (re)starts — for example when AirPods switch Bluetooth
+    /// profile as a call grabs the microphone. The previous baseline is
+    /// meaningless in the new frame, so we adopt the current head position as
+    /// forward and return to listening rather than reading the origin jump as
+    /// a turn-away. No-op (and no baseline is set) if the engine has never
+    /// been calibrated — the user must set forward first.
+    @discardableResult
+    public mutating func reanchor(yawRadians: Double) -> IntentReading {
+        guard baselineYawRadians != nil else {
+            return IntentReading(state: state, relativeYawDegrees: 0)
+        }
+        return calibrate(yawRadians: yawRadians)
+    }
+
     public mutating func update(
         yawRadians: Double,
         timestamp: TimeInterval

@@ -49,6 +49,47 @@ struct TurnawayEngineTests {
         #expect(engine.update(yawRadians: degrees(34), timestamp: 0.3).state == .turnaway)
     }
 
+    @Test func referenceFrameJumpWouldFalselyMuteWithoutReanchor() {
+        // Documents the bug: CMHeadphoneMotionManager captures a fresh yaw
+        // origin each time the motion stream restarts (e.g. AirPods switch
+        // Bluetooth profile when a call grabs the mic). Against a stale
+        // baseline, the origin jump reads as a turn even though the head is
+        // still — so a plain update() mutes.
+        var engine = TurnawayEngine()
+        engine.calibrate(yawRadians: 0)
+        #expect(engine.update(yawRadians: degrees(70), timestamp: 0).state == .listening)
+        #expect(engine.update(yawRadians: degrees(70), timestamp: 1).state == .turnaway)
+    }
+
+    @Test func reanchorAbsorbsAReferenceFrameJump() {
+        // The fix: on a new reference frame, reanchor adopts the current head
+        // position as forward and returns to listening, so a 70° origin jump
+        // with no real head movement does not mute.
+        var engine = TurnawayEngine()
+        engine.calibrate(yawRadians: 0)
+
+        let reading = engine.reanchor(yawRadians: degrees(70))
+        #expect(reading.state == .listening)
+        #expect(abs(reading.relativeYawDegrees) < 0.001)
+
+        // Steady samples in the new frame stay listening — no false mute.
+        #expect(engine.update(yawRadians: degrees(72), timestamp: 1).state == .listening)
+        #expect(engine.update(yawRadians: degrees(72), timestamp: 2).state == .listening)
+
+        // A genuine turn past the threshold in the new frame still mutes.
+        #expect(engine.update(yawRadians: degrees(120), timestamp: 3).state == .listening)
+        #expect(engine.update(yawRadians: degrees(120), timestamp: 4).state == .turnaway)
+    }
+
+    @Test func reanchorBeforeCalibrationStaysUncalibrated() {
+        // A stream (re)start before the user has ever calibrated must not
+        // silently set a forward direction.
+        var engine = TurnawayEngine()
+        let reading = engine.reanchor(yawRadians: degrees(30))
+        #expect(reading.state == .needsCalibration)
+        #expect(engine.baselineYawRadians == nil)
+    }
+
     @Test func angleWrapNearPi() {
         var engine = TurnawayEngine()
         engine.calibrate(yawRadians: degrees(179))

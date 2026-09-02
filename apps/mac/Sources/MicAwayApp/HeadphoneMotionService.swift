@@ -9,11 +9,17 @@ final class HeadphoneMotionService: NSObject, CMHeadphoneMotionManagerDelegate {
         case unavailable(String)
     }
 
-    var onYaw: ((Double) -> Void)?
+    /// Delivers a yaw sample. `isNewReferenceFrame` is true for the first
+    /// sample after the motion stream *restarted* (a reconnect or sample-gap
+    /// recovery), which means CoreMotion handed us a fresh yaw origin and any
+    /// prior calibration must be re-anchored. It is false for the very first
+    /// stream, where the user still calibrates manually.
+    var onYaw: ((_ yawRadians: Double, _ isNewReferenceFrame: Bool) -> Void)?
     var onStatus: ((Status) -> Void)?
 
     private let manager = CMHeadphoneMotionManager()
     private var isRunning = false
+    private var lastDeliveredGeneration = 0
     private var availabilityRetryTask: Task<Void, Never>?
     private var streamRecoveryTask: Task<Void, Never>?
     private var sampleWatchdogTask: Task<Void, Never>?
@@ -125,7 +131,22 @@ final class HeadphoneMotionService: NSObject, CMHeadphoneMotionManagerDelegate {
                     self.streamRestartAttempts = 0
                     self.sampleWatchdogTask?.cancel()
                     self.sampleWatchdogTask = nil
-                    self.onYaw?(yaw)
+
+                    // First sample of a new stream generation carries a fresh
+                    // CoreMotion reference frame. Flag it as a reference change
+                    // only for restarts — not for the very first stream, where
+                    // the user calibrates manually. The comparison is monotonic
+                    // (`>`, not `!=`) so an out-of-order straggler sample from a
+                    // superseded generation can neither spuriously reanchor nor
+                    // rewind the high-water mark.
+                    let isNewReferenceFrame: Bool
+                    if generation > self.lastDeliveredGeneration {
+                        isNewReferenceFrame = self.lastDeliveredGeneration != 0
+                        self.lastDeliveredGeneration = generation
+                    } else {
+                        isNewReferenceFrame = false
+                    }
+                    self.onYaw?(yaw, isNewReferenceFrame)
                 } else if let message {
                     self.recoverMotionStream(after: message)
                 }

@@ -77,6 +77,41 @@ do {
           "high sensitivity: 34° mutes after dwell")
 }
 
+// referenceFrameJumpWouldFalselyMuteWithoutReanchor — documents the bug.
+do {
+    var engine = TurnawayEngine()
+    engine.calibrate(yawRadians: 0)
+    check(engine.update(yawRadians: degrees(70), timestamp: 0).state == .listening,
+          "frame jump: listening before dwell")
+    check(engine.update(yawRadians: degrees(70), timestamp: 1).state == .turnaway,
+          "frame jump against stale baseline falsely mutes (bug)")
+}
+
+// reanchorAbsorbsAReferenceFrameJump — the fix.
+do {
+    var engine = TurnawayEngine()
+    engine.calibrate(yawRadians: 0)
+    let reading = engine.reanchor(yawRadians: degrees(70))
+    check(reading.state == .listening, "reanchor returns to listening")
+    check(abs(reading.relativeYawDegrees) < 0.001, "reanchor zeroes the relative angle")
+    check(engine.update(yawRadians: degrees(72), timestamp: 1).state == .listening,
+          "reanchor: steady head in new frame stays listening")
+    check(engine.update(yawRadians: degrees(72), timestamp: 2).state == .listening,
+          "reanchor: still listening after dwell window")
+    check(engine.update(yawRadians: degrees(120), timestamp: 3).state == .listening,
+          "reanchor: genuine turn listening before dwell")
+    check(engine.update(yawRadians: degrees(120), timestamp: 4).state == .turnaway,
+          "reanchor: genuine turn still mutes in the new frame")
+}
+
+// reanchorBeforeCalibrationStaysUncalibrated.
+do {
+    var engine = TurnawayEngine()
+    let reading = engine.reanchor(yawRadians: degrees(30))
+    check(reading.state == .needsCalibration, "reanchor before calibration stays uncalibrated")
+    check(engine.baselineYawRadians == nil, "reanchor before calibration sets no baseline")
+}
+
 // angleWrapNearPi
 do {
     var engine = TurnawayEngine()
