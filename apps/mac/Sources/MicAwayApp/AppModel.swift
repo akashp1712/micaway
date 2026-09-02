@@ -123,11 +123,10 @@ final class AppModel: ObservableObject {
     private func guardEnabledChanged() {
         if !guardEnabled {
             intentState = engine.state == .needsCalibration ? .needsCalibration : .listening
-            try? microphone.restoreIfNeeded()
         } else if engine.state != .needsCalibration {
             intentState = engine.state
-            applyMuteState()
         }
+        applyMuteState()
     }
 
     private func microphoneGateEnabledChanged() {
