@@ -30,7 +30,7 @@
 </p>
 
 > [!IMPORTANT]
-> **Version 0.3 is a universal developer preview** (Apple silicon + Intel), ad-hoc signed but not yet Developer ID signed or notarized. It is free to download and audit, but macOS will ask you to approve the first launch. Notarized distribution can come later; the source and behavior are available now.
+> **Version 0.4 is a universal developer preview** (Apple silicon + Intel), ad-hoc signed but not yet Developer ID signed or notarized. It is free to download and audit, but macOS will ask you to approve the first launch. Notarized distribution can come later; the source and behavior are available now.
 
 ## The problem
 
@@ -71,7 +71,7 @@ state, and macOS behavior. If a combination behaves differently, please file a
 
 ## Install the preview
 
-1. Download `MicAway-0.3.0-universal.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest) and, optionally, verify it against `MicAway-0.3.0-universal.sha256` with `shasum -a 256 -c MicAway-0.3.0-universal.sha256`.
+1. Download `MicAway-0.4.0-universal.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest) and, optionally, verify it against `MicAway-0.4.0-universal.sha256` with `shasum -a 256 -c MicAway-0.4.0-universal.sha256`.
 2. Unzip it and move `MicAway.app` to **Applications**.
 3. Try to open MicAway. If macOS blocks it, open **System Settings → Privacy & Security**, scroll to **Security**, choose **Open Anyway**, and confirm **Open**.
 4. If macOS still refuses to open the unsigned preview, run the following commands in Terminal:
@@ -131,7 +131,7 @@ Package the universal release archive and checksum with:
 
 ```bash
 cd apps/mac
-./scripts/package-release.sh 0.3.0
+./scripts/package-release.sh 0.4.0
 ```
 
 ## Repository map
