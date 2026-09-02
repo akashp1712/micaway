@@ -34,7 +34,7 @@
 
 ## The problem
 
-Voice-first work is fast—until “yeah, I’ll join in five” lands in the middle of a conversation with your agent.
+Voice-first work is fast—until “yes, I’ll be there in five” lands in the middle of your prompt.
 
 MicAway turns attention into a physical microphone boundary:
 
@@ -42,7 +42,7 @@ MicAway turns attention into a physical microphone boundary:
 - turn toward someone nearby and your available input devices mute;
 - face back and MicAway restores only the inputs it muted.
 
-No wake word. No global shortcut. No audio processing. The voice session stays open while the side conversation stays out.
+No wake word. No global shortcut. No audio processing.
 
 ## Voice-app compatibility
 
