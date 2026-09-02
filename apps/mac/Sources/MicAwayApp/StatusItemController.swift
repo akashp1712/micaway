@@ -8,6 +8,7 @@ final class StatusItemController {
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private var cancellables = Set<AnyCancellable>()
+    private var hotKey: GlobalHotKey?
 
     init(model: AppModel) {
         self.model = model
@@ -32,16 +33,27 @@ final class StatusItemController {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.updateButtonImage() }
             .store(in: &cancellables)
+
+        hotKey = GlobalHotKey.micAwayToggle { [weak model] in
+            model?.manualMuteEngaged.toggle()
+        }
     }
 
     private func updateButtonImage() {
         guard let button = statusItem.button else { return }
-        let image = NSImage(
+        if let image = NSImage(
             systemSymbolName: model.menuBarSymbol,
             accessibilityDescription: model.statusTitle
-        )
-        image?.isTemplate = true
-        button.image = image
+        ) {
+            image.isTemplate = true
+            button.image = image
+            button.title = ""
+        } else {
+            // Guarantee the item is never invisible if a symbol name is
+            // unavailable on this macOS version.
+            button.image = nil
+            button.title = "Mic"
+        }
         button.setAccessibilityLabel(model.statusTitle)
     }
 
