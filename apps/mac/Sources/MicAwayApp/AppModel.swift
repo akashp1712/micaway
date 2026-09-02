@@ -27,12 +27,23 @@ final class AppModel: ObservableObject {
             applyMuteState()
         }
     }
+    @Published var sensitivity: Sensitivity {
+        didSet {
+            guard sensitivity != oldValue else { return }
+            UserDefaults.standard.set(
+                sensitivity.rawValue,
+                forKey: Self.sensitivityDefaultsKey
+            )
+            reconfigureEngine()
+        }
+    }
 
     private var latestYawRadians: Double?
     private var engine = TurnawayEngine()
     private let motion = HeadphoneMotionService()
     private let microphone = InputMuteController()
     private static let microphoneGateDefaultsKey = "microphoneGateEnabled"
+    private static let sensitivityDefaultsKey = "sensitivity"
 
     var canCalibrate: Bool { latestYawRadians != nil }
     var microphoneGateAvailable: Bool { microphone.canMuteInput() }
@@ -70,6 +81,12 @@ final class AppModel: ObservableObject {
         microphoneGateEnabled = UserDefaults.standard.object(
             forKey: Self.microphoneGateDefaultsKey
         ) as? Bool ?? true
+
+        let storedSensitivity = UserDefaults.standard.string(
+            forKey: Self.sensitivityDefaultsKey
+        ).flatMap(Sensitivity.init(rawValue:)) ?? .default
+        sensitivity = storedSensitivity
+        engine = TurnawayEngine(configuration: storedSensitivity.configuration)
 
         motion.onStatus = { [weak self] status in
             self?.motionStatus = status
@@ -118,6 +135,25 @@ final class AppModel: ObservableObject {
 
         guard previousState != intentState else { return }
         applyMuteState()
+    }
+
+    private func reconfigureEngine() {
+        // Preserve the existing calibration baseline across a sensitivity change.
+        let baseline = engine.baselineYawRadians
+        var rebuilt = TurnawayEngine(configuration: sensitivity.configuration)
+        if let baseline {
+            rebuilt.calibrate(yawRadians: baseline)
+        }
+        engine = rebuilt
+
+        // Re-evaluate the current head position under the new thresholds so the
+        // change takes effect immediately (e.g. lowering sensitivity unmutes).
+        if let latestYawRadians, engine.state != .needsCalibration {
+            apply(engine.update(
+                yawRadians: latestYawRadians,
+                timestamp: ProcessInfo.processInfo.systemUptime
+            ))
+        }
     }
 
     private func guardEnabledChanged() {

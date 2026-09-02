@@ -51,6 +51,19 @@ struct MenuBarContentView: View {
                 .disabled(!model.manualMuteAvailable)
                 .padding(.top, 10)
 
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Turn sensitivity")
+                    .font(.system(size: 13))
+                Picker("Turn sensitivity", selection: $model.sensitivity) {
+                    ForEach(Sensitivity.allCases) { level in
+                        Text(level.label).tag(level)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+            }
+            .padding(.top, 16)
+
             Text(model.message)
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)

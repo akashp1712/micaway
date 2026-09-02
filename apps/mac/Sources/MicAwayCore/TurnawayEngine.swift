@@ -13,9 +13,9 @@ public struct TurnawayConfiguration: Equatable, Sendable {
     public var exitDwellSeconds: TimeInterval
 
     public init(
-        enterThresholdDegrees: Double = 28,
-        exitThresholdDegrees: Double = 16,
-        enterDwellSeconds: TimeInterval = 0.24,
+        enterThresholdDegrees: Double = 45,
+        exitThresholdDegrees: Double = 28,
+        enterDwellSeconds: TimeInterval = 0.40,
         exitDwellSeconds: TimeInterval = 0.34
     ) {
         precondition(enterThresholdDegrees > exitThresholdDegrees)

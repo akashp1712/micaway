@@ -8,24 +8,45 @@ struct TurnawayEngineTests {
         #expect(reading.state == .needsCalibration)
     }
 
+    // Default engine == Medium sensitivity: enter 45°, exit 28°,
+    // enter dwell 0.40s, exit dwell 0.34s.
     @Test func dwellAndHysteresis() {
         var engine = TurnawayEngine()
         engine.calibrate(yawRadians: 0)
 
-        #expect(engine.update(yawRadians: degrees(32), timestamp: 0).state == .listening)
-        #expect(engine.update(yawRadians: degrees(32), timestamp: 0.25).state == .turnaway)
+        #expect(engine.update(yawRadians: degrees(50), timestamp: 0).state == .listening)
+        #expect(engine.update(yawRadians: degrees(50), timestamp: 0.45).state == .turnaway)
 
-        #expect(engine.update(yawRadians: degrees(22), timestamp: 0.4).state == .turnaway)
-        #expect(engine.update(yawRadians: degrees(10), timestamp: 0.5).state == .turnaway)
-        #expect(engine.update(yawRadians: degrees(10), timestamp: 0.85).state == .listening)
+        #expect(engine.update(yawRadians: degrees(30), timestamp: 0.5).state == .turnaway)
+        #expect(engine.update(yawRadians: degrees(20), timestamp: 0.6).state == .turnaway)
+        #expect(engine.update(yawRadians: degrees(20), timestamp: 1.0).state == .listening)
     }
 
     @Test func briefGlanceDoesNotTriggerTurnaway() {
         var engine = TurnawayEngine()
         engine.calibrate(yawRadians: 0)
 
-        #expect(engine.update(yawRadians: degrees(-40), timestamp: 1).state == .listening)
+        // Past the enter threshold for a single sample, then back before the dwell.
+        #expect(engine.update(yawRadians: degrees(-50), timestamp: 1).state == .listening)
         #expect(engine.update(yawRadians: degrees(-5), timestamp: 1.1).state == .listening)
+    }
+
+    @Test func lowSensitivityIgnoresAMediumTurn() {
+        var engine = TurnawayEngine(configuration: Sensitivity.low.configuration)
+        engine.calibrate(yawRadians: 0)
+
+        // 45° clears Medium's threshold but not Low's 60° — should stay listening.
+        #expect(engine.update(yawRadians: degrees(45), timestamp: 0).state == .listening)
+        #expect(engine.update(yawRadians: degrees(45), timestamp: 1).state == .listening)
+    }
+
+    @Test func highSensitivityCatchesASmallTurn() {
+        var engine = TurnawayEngine(configuration: Sensitivity.high.configuration)
+        engine.calibrate(yawRadians: 0)
+
+        // 34° clears High's 30° threshold; hold past the 0.24s dwell.
+        #expect(engine.update(yawRadians: degrees(34), timestamp: 0).state == .listening)
+        #expect(engine.update(yawRadians: degrees(34), timestamp: 0.3).state == .turnaway)
     }
 
     @Test func angleWrapNearPi() {
