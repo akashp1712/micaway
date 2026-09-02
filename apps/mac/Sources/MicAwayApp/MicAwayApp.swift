@@ -14,7 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        // Replaced with model.prepareForTermination() in Task 4.
+        model?.prepareForTermination()
     }
 }
 

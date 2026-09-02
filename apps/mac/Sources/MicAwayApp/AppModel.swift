@@ -21,6 +21,12 @@ final class AppModel: ObservableObject {
             microphoneGateEnabledChanged()
         }
     }
+    @Published var manualMuteEngaged = false {
+        didSet {
+            guard manualMuteEngaged != oldValue else { return }
+            applyMuteState()
+        }
+    }
 
     private var latestYawRadians: Double?
     private var engine = TurnawayEngine()
@@ -30,6 +36,7 @@ final class AppModel: ObservableObject {
 
     var canCalibrate: Bool { latestYawRadians != nil }
     var microphoneGateAvailable: Bool { microphone.canMuteInput() }
+    var manualMuteAvailable: Bool { microphone.canMuteInput() }
 
     var statusTitle: String {
         switch intentState {
@@ -51,7 +58,8 @@ final class AppModel: ObservableObject {
     }
 
     var menuBarSymbol: String {
-        switch intentState {
+        if manualMuteEngaged { return "mic.slash.fill" }
+        return switch intentState {
         case .needsCalibration: "waveform.badge.exclamationmark"
         case .listening: "waveform.circle.fill"
         case .turnaway: "waveform.slash"
@@ -92,8 +100,7 @@ final class AppModel: ObservableObject {
     }
 
     func quit() {
-        motion.stop()
-        try? microphone.restoreIfNeeded()
+        prepareForTermination()
         NSApplication.shared.terminate(nil)
     }
 
@@ -110,7 +117,7 @@ final class AppModel: ObservableObject {
         relativeYawDegrees = reading.relativeYawDegrees
 
         guard previousState != intentState else { return }
-        synchronizeMicrophoneGate()
+        applyMuteState()
     }
 
     private func guardEnabledChanged() {
@@ -119,30 +126,34 @@ final class AppModel: ObservableObject {
             try? microphone.restoreIfNeeded()
         } else if engine.state != .needsCalibration {
             intentState = engine.state
-            synchronizeMicrophoneGate()
+            applyMuteState()
         }
     }
 
     private func microphoneGateEnabledChanged() {
-        if microphoneGateEnabled {
-            synchronizeMicrophoneGate()
-        } else {
-            try? microphone.restoreIfNeeded()
-        }
+        applyMuteState()
     }
 
-    private func synchronizeMicrophoneGate() {
-        guard microphoneGateEnabled else { return }
-
+    private func applyMuteState() {
+        let shouldMute = MuteResolver.shouldMute(
+            manualMuteEngaged: manualMuteEngaged,
+            guardEnabled: guardEnabled,
+            microphoneGateEnabled: microphoneGateEnabled,
+            intentState: intentState
+        )
         do {
-            if guardEnabled && intentState == .turnaway {
+            if shouldMute {
                 try microphone.muteForTurnaway()
             } else {
                 try microphone.restoreIfNeeded()
             }
         } catch {
-            microphoneGateEnabled = false
             message = error.localizedDescription
         }
+    }
+
+    func prepareForTermination() {
+        motion.stop()
+        try? microphone.restoreIfNeeded()
     }
 }

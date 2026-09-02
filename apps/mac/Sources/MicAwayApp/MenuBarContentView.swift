@@ -46,6 +46,11 @@ struct MenuBarContentView: View {
                 .disabled(!model.microphoneGateAvailable)
                 .padding(.top, 10)
 
+            Toggle("Mute mic now (⌥⌘M)", isOn: $model.manualMuteEngaged)
+                .toggleStyle(.switch)
+                .disabled(!model.manualMuteAvailable)
+                .padding(.top, 10)
+
             Text(model.message)
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
