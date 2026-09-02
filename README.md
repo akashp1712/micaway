@@ -20,7 +20,7 @@
 
 <p align="center">
   <img alt="macOS 14 or newer" src="https://img.shields.io/badge/macOS-14%2B-171714?style=flat-square" />
-  <img alt="Apple silicon" src="https://img.shields.io/badge/Mac-Apple_silicon-171714?style=flat-square" />
+  <img alt="Universal: Apple silicon and Intel" src="https://img.shields.io/badge/Mac-Universal_(Apple_silicon_%2B_Intel)-171714?style=flat-square" />
   <img alt="Swift 5.10" src="https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square" />
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-43A56D?style=flat-square" /></a>
 </p>
@@ -30,7 +30,7 @@
 </p>
 
 > [!IMPORTANT]
-> **Version 0.1 is an unsigned Apple-silicon developer preview.** It is free to download and audit, but macOS will ask you to approve the first launch. Signed and notarized distribution can come later; the source and behavior are available now.
+> **Version 0.3 is a universal developer preview** (Apple silicon + Intel), ad-hoc signed but not yet Developer ID signed or notarized. It is free to download and audit, but macOS will ask you to approve the first launch. Notarized distribution can come later; the source and behavior are available now.
 
 ## The problem
 
@@ -56,9 +56,22 @@ MicAway acts on writable macOS input devices, so it is not tied to one dictation
 
 If you test another Mac, AirPods model, or voice app, open a [compatibility report](https://github.com/akashp1712/micaway/issues/new?template=compatibility-report.yml). Please never paste private dictated text into an issue.
 
+## Compatibility
+
+| What | Supported |
+| --- | --- |
+| **macOS** | 14 (Sonoma) or newer. `CMHeadphoneMotionManager` sets this floor. |
+| **Mac chips** | Universal binary. Apple silicon — M1, M1 Pro/Max/Ultra, M2, M3, M4 (all variants) — natively, plus Intel Macs. |
+| **AirPods (head tracking)** | AirPods Pro (1st & 2nd gen), AirPods (3rd & 4th gen), AirPods Max. Any AirPods with dynamic head tracking work; MicAway degrades gracefully on models without it. |
+| **Without AirPods** | No head tracking, but manual mute (**⌥⌘M**) still works. |
+
+Head-tracking availability can still vary by AirPods generation, connection
+state, and macOS behavior. If a combination behaves differently, please file a
+[compatibility report](https://github.com/akashp1712/micaway/issues/new?template=compatibility-report.yml).
+
 ## Install the preview
 
-1. Download `MicAway-0.1.0-arm64.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest).
+1. Download `MicAway-0.3.0-universal.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest) and, optionally, verify it against `MicAway-0.3.0-universal.sha256` with `shasum -a 256 -c MicAway-0.3.0-universal.sha256`.
 2. Unzip it and move `MicAway.app` to **Applications**.
 3. Try to open MicAway. If macOS blocks it, open **System Settings → Privacy & Security**, scroll to **Security**, choose **Open Anyway**, and confirm **Open**.
 4. If macOS still refuses to open the unsigned preview, run the following commands in Terminal:
@@ -73,7 +86,12 @@ If you test another Mac, AirPods model, or voice app, open a [compatibility repo
 
 5. Put compatible AirPods in both ears, allow **Motion** access when macOS asks, face your Mac, and select **Calibrate**.
 
-MicAway lives in the menu bar. It requires macOS 14 or newer and a Mac with Apple silicon for the current binary.
+Then tune it to how you work:
+
+- **Turn sensitivity** (Low / Medium / High) sets how far you can turn before the mic mutes. Medium is the default (mute past ~45°, restore under ~28°); Low tolerates a bigger turn, High reacts to a smaller one.
+- **Mute mic now (⌥⌘M)** mutes instantly from anywhere, with or without AirPods.
+
+MicAway lives in the menu bar. It runs on macOS 14 or newer and is a universal binary — native on Apple silicon (M1–M4) and Intel Macs.
 
 MicAway does **not** request Microphone or Accessibility access. It reads AirPods motion locally and changes writable input-device mute state through Core Audio; it does not listen to or control your Mac through Accessibility APIs.
 
@@ -96,7 +114,7 @@ Requirements: macOS 14+, Xcode Command Line Tools, and Swift 5.10 or newer.
 ```bash
 git clone https://github.com/akashp1712/micaway.git
 cd micaway/apps/mac
-./scripts/build-app.sh
+./scripts/build-app.sh      # universal arm64 + x86_64 .app in dist/
 open "dist/MicAway.app"
 ```
 
@@ -104,14 +122,16 @@ Run the tests with:
 
 ```bash
 cd apps/mac
-swift test
+./scripts/test.sh
 ```
 
-Package the release archive and checksum with:
+`test.sh` runs the canonical swift-testing suite via SwiftPM when the toolchain is healthy, and otherwise falls back to a standalone `swiftc`-compiled runner that mirrors the same assertions — useful when a Command Line Tools install leaves `swift test` broken with `Invalid manifest … PackageDescription.Package.__allocating_init`.
+
+Package the universal release archive and checksum with:
 
 ```bash
 cd apps/mac
-./scripts/package-release.sh 0.1.0
+./scripts/package-release.sh 0.3.0
 ```
 
 ## Repository map
@@ -125,7 +145,7 @@ docs/       Product and engineering notes
 ## Known limits
 
 - Compatible AirPods and Motion access are required for head tracking.
-- The current downloadable build is Apple-silicon only and not notarized.
+- The downloadable build is universal (Apple silicon + Intel) but ad-hoc signed, not Developer ID signed or notarized.
 - A voice app using a non-mutable virtual microphone may need a future MicAway virtual-input mode.
 - Headphone motion availability can vary by AirPods generation, connection state, and macOS behavior.
 

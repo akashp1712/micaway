@@ -31,6 +31,10 @@ even when a Command Line Tools update leaves `swift build` broken with
 `Invalid manifest ... PackageDescription.Package.__allocating_init`. If you
 have a healthy toolchain or full Xcode, `swift build` / `swift test` also work.
 
+**Turn sensitivity:** choose Low / Medium / High in the popover to set how far
+you can turn before the mic mutes. Medium (the default) mutes past ~45° and
+restores under ~28°; Low tolerates a bigger turn, High reacts to a smaller one.
+
 **Manual mute:** toggle it from the menu-bar popover or press **⌥⌘M** anywhere.
 
 Grant Motion access when macOS asks. Put in your AirPods, open the menu-bar item, face the Mac, and choose **Calibrate**.
