@@ -23,7 +23,7 @@ for arch in "${ARCHS[@]}"; do
   mkdir -p "$archdir"
 
   # 1) MicAwayCore as a module + object
-  xcrun swiftc -O -target "$target" -parse-as-library \
+  xcrun swiftc -O -wmo -target "$target" -parse-as-library \
     -module-name MicAwayCore \
     -emit-module -emit-module-path "$archdir/MicAwayCore.swiftmodule" \
     -emit-object -o "$archdir/MicAwayCore.o" \
