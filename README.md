@@ -34,7 +34,7 @@
 
 ## The problem
 
-Voice-first work is fast—until “yes, I’ll be there in five” lands in the middle of your prompt.
+Voice-first work is fast—until “yeah, I’ll join in five” lands in the middle of a conversation with your agent.
 
 MicAway turns attention into a physical microphone boundary:
 
@@ -42,7 +42,7 @@ MicAway turns attention into a physical microphone boundary:
 - turn toward someone nearby and your available input devices mute;
 - face back and MicAway restores only the inputs it muted.
 
-No wake word. No global shortcut. No audio processing.
+No wake word. No global shortcut. No audio processing. The voice session stays open while the side conversation stays out.
 
 ## Voice-app compatibility
 
@@ -60,10 +60,22 @@ If you test another Mac, AirPods model, or voice app, open a [compatibility repo
 
 1. Download `MicAway-0.1.0-arm64.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest).
 2. Unzip it and move `MicAway.app` to **Applications**.
-3. Control-click the app and choose **Open**. If macOS still blocks it, go to **System Settings → Privacy & Security** and choose **Open Anyway**.
-4. Put compatible AirPods in both ears, launch MicAway, face your Mac, and select **Calibrate**.
+3. Try to open MicAway. If macOS blocks it, open **System Settings → Privacy & Security**, scroll to **Security**, choose **Open Anyway**, and confirm **Open**.
+4. If macOS still refuses to open the unsigned preview, run the following commands in Terminal:
+
+   ```bash
+   xattr -cr "/Applications/MicAway.app"
+   open "/Applications/MicAway.app"
+   ```
+
+   > [!WARNING]
+   > Run this only for `MicAway.app` downloaded from the [official GitHub release](https://github.com/akashp1712/micaway/releases/latest). It removes quarantine metadata from MicAway only. Never run it against your entire Applications or Downloads folder, and never replace the app path with a wildcard.
+
+5. Put compatible AirPods in both ears, allow **Motion** access when macOS asks, face your Mac, and select **Calibrate**.
 
 MicAway lives in the menu bar. It requires macOS 14 or newer and a Mac with Apple silicon for the current binary.
+
+MicAway does **not** request Microphone or Accessibility access. It reads AirPods motion locally and changes writable input-device mute state through Core Audio; it does not listen to or control your Mac through Accessibility APIs.
 
 ## Privacy by construction
 
