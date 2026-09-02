@@ -3,8 +3,8 @@ set -euo pipefail
 
 APP_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="${1:-0.1.0}"
-ARCHIVE_NAME="MicAway-${VERSION}-arm64.zip"
-CHECKSUM_NAME="MicAway-${VERSION}-arm64.sha256"
+ARCHIVE_NAME="MicAway-${VERSION}-universal.zip"
+CHECKSUM_NAME="MicAway-${VERSION}-universal.sha256"
 
 cd "$APP_ROOT"
 ./scripts/build-app.sh
