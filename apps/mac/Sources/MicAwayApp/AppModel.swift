@@ -3,6 +3,14 @@ import Combine
 import Foundation
 import MicAwayCore
 
+enum MenuBarStatus: Equatable {
+    case listening
+    case turnaway
+    case paused
+    case inactive
+    case needsCalibration
+}
+
 @MainActor
 final class AppModel: ObservableObject {
     @Published private(set) var intentState: IntentState = .needsCalibration
@@ -105,14 +113,35 @@ final class AppModel: ObservableObject {
         }
     }
 
-    var menuBarSymbol: String {
-        if !turnawayEnabled { return "pause.circle.fill" }
-        if !activeApplicationAllowed { return "waveform.circle" }
+    var menuBarStatus: MenuBarStatus {
+        if !turnawayEnabled { return .paused }
+        if !activeApplicationAllowed { return .inactive }
         return switch intentState {
-        case .needsCalibration: "waveform.badge.exclamationmark"
-        case .listening: "waveform.circle.fill"
-        case .turnaway: "waveform.slash"
+        case .needsCalibration: .needsCalibration
+        case .listening: .listening
+        case .turnaway: .turnaway
         }
+    }
+
+    /// Display-only model for marketing screenshots. Does not start motion,
+    /// audio monitoring, or persist defaults.
+    init(
+        snapshotIntent: IntentState,
+        yawDegrees: Double,
+        turnawayEnabled: Bool = true,
+        message: String,
+        applicationScope: ApplicationScope = .everyApp
+    ) {
+        self.turnawayEnabled = turnawayEnabled
+        self.sensitivity = .default
+        self.engine = TurnawayEngine(configuration: Sensitivity.default.configuration)
+        self.applicationScope = applicationScope
+        self.selectedApplications = []
+        self.intentState = snapshotIntent
+        self.relativeYawDegrees = yawDegrees
+        self.message = message
+        self.latestYawRadians = 0
+        self.motionStatus = .connected
     }
 
     init() {

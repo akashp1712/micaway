@@ -7,6 +7,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemController: StatusItemController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if let directory = ProcessInfo.processInfo.environment["MICAWAY_SNAPSHOT_DIR"] {
+            MenuBarSnapshotRenderer.write(to: URL(fileURLWithPath: directory)) {
+                NSApplication.shared.terminate(nil)
+            }
+            return
+        }
+
         NSApplication.shared.setActivationPolicy(.accessory)
         let model = AppModel()
         self.model = model
@@ -14,6 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        statusItemController?.invalidate()
         model?.prepareForTermination()
     }
 

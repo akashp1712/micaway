@@ -19,6 +19,7 @@ let package = Package(
             path: "Sources/MicAwayApp",
             linkerSettings: [
                 .linkedFramework("AppKit"),
+                .linkedFramework("Carbon"),
                 .linkedFramework("CoreAudio"),
                 .linkedFramework("CoreMotion")
             ]

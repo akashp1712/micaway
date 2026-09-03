@@ -1,6 +1,5 @@
 import { Download, Github } from "lucide-react";
 import Image from "next/image";
-import { AppShot } from "@/components/app-shot";
 import { AttentionDemo } from "@/components/attention-demo";
 import { DownloadCount } from "@/components/download-count";
 import { InstallGuide } from "@/components/install-guide";
@@ -23,32 +22,32 @@ const voiceApps = [
   },
   {
     name: "FluidVoice",
-    logo: "/brands/fluidvoice-mark.png",
+    logo: "/brands/fluidvoice-icon.png",
     className: "fluidvoice-logo",
     href: "https://fluidvoice.org/?utm_source=micaway&utm_medium=referral&utm_campaign=compatible_voice_apps",
   },
 ] as const;
 
-const setupSteps = [
+const menuShots = [
   {
-    number: "1",
+    src: "/images/menu/calibrate.png",
     title: "Calibrate",
     copy: "Wear your AirPods, face your Mac, and set forward once.",
-    state: "calibrate" as const,
+    alt: "MicAway menu asking you to face your Mac and calibrate",
   },
   {
-    number: "2",
+    src: "/images/menu/listening.png",
     title: "Talk",
     copy: "Face forward. MicAway leaves your input available.",
-    state: "listening" as const,
+    alt: "MicAway menu showing Listening while facing the Mac",
   },
   {
-    number: "3",
+    src: "/images/menu/away.png",
     title: "Turn",
     copy: "Look toward someone beside you. The aside stays out.",
-    state: "away" as const,
+    alt: "MicAway menu showing Not for your Mac after turning away",
   },
-];
+] as const;
 
 export default function HomePage() {
   return (
@@ -102,15 +101,14 @@ export default function HomePage() {
       <section aria-labelledby="how-title" className="how-section">
         <h2 id="how-title">Set it once. Then turn.</h2>
         <div className="setup-gallery">
-          {setupSteps.map((step) => (
-            <article className="setup-step" key={step.number}>
-              <AppShot state={step.state} />
+          {menuShots.map((shot) => (
+            <article className="setup-step" key={shot.title}>
+              <div className="menu-shot">
+                <Image alt={shot.alt} height={321} src={shot.src} width={356} />
+              </div>
               <div className="setup-caption">
-                <h3>
-                  <span>{step.number}</span>
-                  {step.title}
-                </h3>
-                <p>{step.copy}</p>
+                <h3>{shot.title}</h3>
+                <p>{shot.copy}</p>
               </div>
             </article>
           ))}
@@ -161,9 +159,13 @@ export default function HomePage() {
               unselected meeting app is using your microphone, MicAway stays
               inactive.
             </p>
-            <div aria-hidden="true" className="scope-preview">
-              <span>Every app</span>
-              <strong>Selected apps</strong>
+            <div className="menu-shot menu-shot-embed">
+              <Image
+                alt="MicAway Advanced settings with Use in and Sensitivity"
+                height={397}
+                src="/images/menu/advanced.png"
+                width={356}
+              />
             </div>
           </article>
           <article className="control-card">
@@ -173,9 +175,13 @@ export default function HomePage() {
               Switch turnaway muting off while walking around the office. Turn
               it back on and MicAway safely re-centers to your current position.
             </p>
-            <div aria-hidden="true" className="pause-preview">
-              <span>Turnaway muting</span>
-              <i />
+            <div className="menu-shot menu-shot-embed">
+              <Image
+                alt="MicAway menu paused with turnaway muting off"
+                height={321}
+                src="/images/menu/paused.png"
+                width={356}
+              />
             </div>
           </article>
         </div>

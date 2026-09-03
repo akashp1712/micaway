@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-03
 
-Current version: 0.5.1 developer preview
+Current version: 0.5.2 developer preview
 
 Official website: https://micaway.akashpanchal.com/
 
@@ -41,7 +41,7 @@ Users should use the normal mute control in their voice or meeting app for delib
 
 ## Distribution
 
-MicAway is free and open source under the MIT License. Version 0.5.1 is a universal developer preview. Its downloadable application is ad-hoc signed but is not Developer ID signed or notarized, so macOS may require first-launch approval.
+MicAway is free and open source under the MIT License. Version 0.5.2 is a universal developer preview. Its downloadable application is ad-hoc signed but is not Developer ID signed or notarized, so macOS may require first-launch approval.
 
 ## Limitations
 

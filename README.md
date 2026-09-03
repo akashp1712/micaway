@@ -29,8 +29,14 @@
   <img src="apps/web/public/images/micaway-turnaway.png" alt="A developer wearing AirPods turning away from a Mac for a side conversation" width="920" />
 </p>
 
+<p align="center">
+  <img src="apps/web/public/images/menu/listening.png" alt="MicAway menu bar popover showing Listening" width="280" />
+  &nbsp;
+  <img src="apps/web/public/images/menu/away.png" alt="MicAway menu bar popover showing Not for your Mac after turning away" width="280" />
+</p>
+
 > [!IMPORTANT]
-> **Version 0.5.1 is a universal developer preview** (Apple silicon + Intel), ad-hoc signed but not yet Developer ID signed or notarized. It is free to download and audit, but macOS will ask you to approve the first launch. Notarized distribution can come later; the source and behavior are available now.
+> **Version 0.5.2 is a universal developer preview** (Apple silicon + Intel), ad-hoc signed but not yet Developer ID signed or notarized. It is free to download and audit, but macOS will ask you to approve the first launch. Notarized distribution can come later; the source and behavior are available now.
 
 ## The problem
 
@@ -44,7 +50,7 @@ MicAway turns attention into a physical microphone boundary:
 - limit automatic muting to selected dictation apps, keeping meeting apps untouched;
 - pause turnaway muting while carrying or repositioning your Mac, then resume from a safely re-centered position.
 
-No wake word. No global shortcut. No audio processing.
+No wake word. No audio processing. ⌥⌘M pauses or resumes MicAway.
 
 ## Voice-app compatibility
 
@@ -73,7 +79,7 @@ state, and macOS behavior. If a combination behaves differently, please file a
 
 ## Install the preview
 
-1. Download `MicAway-0.5.1-universal.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest) and, optionally, verify it against `MicAway-0.5.1-universal.sha256` with `shasum -a 256 -c MicAway-0.5.1-universal.sha256`.
+1. Download `MicAway-0.5.2-universal.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest) and, optionally, verify it against `MicAway-0.5.2-universal.sha256` with `shasum -a 256 -c MicAway-0.5.2-universal.sha256`.
 2. Unzip it and move `MicAway.app` to **Applications**.
 3. Try to open MicAway. If macOS blocks it, open **System Settings → Privacy & Security**, scroll to **Security**, choose **Open Anyway**, and confirm **Open**.
 4. If macOS still refuses to open the unsigned preview, run the following commands in Terminal:
@@ -90,7 +96,7 @@ state, and macOS behavior. If a combination behaves differently, please file a
 
 Then tune it to how you work:
 
-- **Turnaway muting** is the master switch. Switch it off while moving around; switching it back on re-centers to your current position before automatic muting resumes.
+- **Turnaway muting** is the master switch (`⌥⌘M`). Switch it off while moving around; switching it back on re-centers to your current position before automatic muting resumes.
 - **Advanced → Use in** can apply automatic muting in every app or only selected apps. To add an app, bring it forward, open MicAway, choose **Selected apps**, then choose **Allowed apps → Add _App Name_**. If any unselected app is also using the microphone, automatic muting stays safely inactive.
 - **Advanced → Sensitivity** (Low / Medium / High) sets how far you can turn before the mic mutes. Medium is the default (mute past ~45°, restore under ~28°); Low tolerates a bigger turn, High reacts to a smaller one.
 
@@ -136,7 +142,7 @@ Package the universal release archive and checksum with:
 
 ```bash
 cd apps/mac
-./scripts/package-release.sh 0.5.1
+./scripts/package-release.sh 0.5.2
 ```
 
 ## Repository map

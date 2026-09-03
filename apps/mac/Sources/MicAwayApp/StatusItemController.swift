@@ -8,21 +8,36 @@ final class StatusItemController {
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private var cancellables = Set<AnyCancellable>()
-    private var lastSymbol: String?
+    private var hotKey: GlobalHotKey?
+    private var lastIcon: IconKey?
+
+    private struct IconKey: Equatable {
+        var status: MenuBarStatus
+        var appearance: String
+    }
 
     init(model: AppModel) {
         self.model = model
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // Square length keeps the status button bounds stable when the glyph
+        // changes (pause vs waveform). Variable length shifts the popover
+        // anchor by a few pixels and makes the panel look like it tilts.
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         // A stable identity so the user can ⌘-drag the icon to a visible slot
         // (e.g. out from behind the notch on a crowded menu bar) and have macOS
         // remember that position across launches.
         statusItem.autosaveName = "com.akashpanchal.micaway.statusitem"
 
-        popover = NSPopover()
-        popover.behavior = .transient
-        popover.contentViewController = NSHostingController(
+        let hostingController = NSHostingController(
             rootView: MenuBarContentView(model: model)
         )
+        hostingController.sizingOptions = .preferredContentSize
+
+        popover = NSPopover()
+        popover.behavior = .transient
+        // Size jumps from expanding Advanced must not be interpolated — SwiftUI
+        // and NSPopover animating the same frame produces flicker.
+        popover.animates = false
+        popover.contentViewController = hostingController
 
         if let button = statusItem.button {
             button.target = self
@@ -37,31 +52,79 @@ final class StatusItemController {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.updateButtonImage() }
             .store(in: &cancellables)
+
+        hotKey = GlobalHotKey.micAwayToggle { [weak model] in
+            model?.turnawayEnabled.toggle()
+        }
+    }
+
+    func invalidate() {
+        hotKey?.invalidate()
+        hotKey = nil
     }
 
     private func updateButtonImage() {
         guard let button = statusItem.button else { return }
-
-        // The model publishes on every head-yaw sample; only touch AppKit when
-        // the glyph actually changes to avoid rebuilding the image each tick.
-        let symbol = model.menuBarSymbol
-        if symbol != lastSymbol {
-            lastSymbol = symbol
-            if let image = NSImage(
-                systemSymbolName: symbol,
-                accessibilityDescription: model.statusTitle
-            ) {
-                image.isTemplate = true
-                button.image = image
-                button.title = ""
-            } else {
-                // Guarantee the item is never invisible if a symbol name is
-                // unavailable on this macOS version.
-                button.image = nil
-                button.title = "Mic"
-            }
+        let appearance = button.effectiveAppearance
+        let key = IconKey(
+            status: model.menuBarStatus,
+            appearance: appearance.name.rawValue
+        )
+        if key != lastIcon {
+            lastIcon = key
+            button.image = makeIcon(status: key.status, appearance: appearance)
+            button.title = ""
         }
         button.setAccessibilityLabel(model.statusTitle)
+    }
+
+    private func makeIcon(status: MenuBarStatus, appearance: NSAppearance) -> NSImage {
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size, flipped: false) { rect in
+            appearance.performAsCurrentDrawingAppearance {
+                Self.drawWaveform(in: rect)
+                Self.drawDot(Self.dotColor(for: status), in: rect, appearance: appearance)
+            }
+            return true
+        }
+        image.isTemplate = false
+        return image
+    }
+
+    private static func drawWaveform(in rect: NSRect) {
+        let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
+        guard let symbol = NSImage(
+            systemSymbolName: "waveform.circle.fill",
+            accessibilityDescription: nil
+        )?.withSymbolConfiguration(config) else { return }
+
+        let iconRect = NSRect(x: 0, y: 1.5, width: 15.5, height: 15.5)
+        symbol.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: 1)
+        NSColor.labelColor.setFill()
+        iconRect.fill(using: .sourceIn)
+    }
+
+    private static func drawDot(_ color: NSColor, in rect: NSRect, appearance: NSAppearance) {
+        let dot = NSRect(x: 12.2, y: 0.6, width: 5.4, height: 5.4)
+        let ring = dot.insetBy(dx: -1, dy: -1)
+        let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        (isDark ? NSColor.black : NSColor.white).withAlphaComponent(0.92).setFill()
+        NSBezierPath(ovalIn: ring).fill()
+        color.setFill()
+        NSBezierPath(ovalIn: dot).fill()
+    }
+
+    private static func dotColor(for status: MenuBarStatus) -> NSColor {
+        switch status {
+        case .listening:
+            return NSColor(srgbRed: 0.18, green: 0.62, blue: 0.38, alpha: 1)
+        case .turnaway:
+            return NSColor(srgbRed: 0.72, green: 0.72, blue: 0.68, alpha: 1)
+        case .paused, .inactive:
+            return NSColor.systemGray
+        case .needsCalibration:
+            return NSColor.systemOrange
+        }
     }
 
     @objc private func togglePopover(_ sender: NSStatusBarButton) {
