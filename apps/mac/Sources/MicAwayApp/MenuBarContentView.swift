@@ -45,39 +45,37 @@ struct MenuBarContentView: View {
             Toggle("Turnaway muting", isOn: $model.turnawayEnabled)
                 .toggleStyle(.switch)
 
-            Picker("Use in", selection: $model.applicationScope) {
-                ForEach(ApplicationScope.allCases) { scope in
-                    Text(scope.label).tag(scope)
-                }
-            }
-            .pickerStyle(.menu)
-            .padding(.top, 8)
-
-            if model.applicationScope == .selectedApps {
-                Menu("Apps (\(model.selectedApplications.count))") {
-                    Button(
-                        model.activeApplicationSelected
-                            ? "Remove \(model.activeApplicationName)"
-                            : "Add \(model.activeApplicationName)"
-                    ) {
-                        model.setActiveApplicationAllowed(!model.activeApplicationSelected)
+            DisclosureGroup("Advanced", isExpanded: $advancedExpanded) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Picker("Use in", selection: $model.applicationScope) {
+                        ForEach(ApplicationScope.allCases) { scope in
+                            Text(scope.label).tag(scope)
+                        }
                     }
-                    .disabled(model.activeApplication == nil)
+                    .pickerStyle(.menu)
 
-                    if !model.selectedApplications.isEmpty {
-                        Divider()
-                        ForEach(model.selectedApplications) { application in
-                            Button("Remove \(application.name)") {
-                                model.removeSelectedApplication(application)
+                    if model.applicationScope == .selectedApps {
+                        Menu("Allowed apps (\(model.selectedApplications.count))") {
+                            Button(
+                                model.activeApplicationSelected
+                                    ? "Remove \(model.activeApplicationName)"
+                                    : "Add \(model.activeApplicationName)"
+                            ) {
+                                model.setActiveApplicationAllowed(!model.activeApplicationSelected)
+                            }
+                            .disabled(model.activeApplication == nil)
+
+                            if !model.selectedApplications.isEmpty {
+                                Divider()
+                                ForEach(model.selectedApplications) { application in
+                                    Button("Remove \(application.name)") {
+                                        model.removeSelectedApplication(application)
+                                    }
+                                }
                             }
                         }
                     }
-                }
-                .padding(.top, 4)
-            }
 
-            DisclosureGroup("Advanced", isExpanded: $advancedExpanded) {
-                VStack(alignment: .leading, spacing: 8) {
                     Picker("Sensitivity", selection: $model.sensitivity) {
                         ForEach(Sensitivity.allCases) { level in
                             Text(level.label).tag(level)
@@ -92,7 +90,7 @@ struct MenuBarContentView: View {
                 }
             }
             .font(.system(size: 12))
-            .padding(.top, 10)
+            .padding(.top, 12)
 
             HStack(spacing: 8) {
                 if model.canCalibrate {

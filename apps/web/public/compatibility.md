@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-03
 
-Current version: 0.5.0
+Current version: 0.5.1
 
 ## System compatibility
 

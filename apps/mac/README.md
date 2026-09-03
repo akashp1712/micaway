@@ -37,8 +37,8 @@ have a healthy toolchain or full Xcode, `swift build` / `swift test` also work.
 you can turn before the mic mutes. Medium (the default) mutes past ~45° and
 restores under ~28°; Low tolerates a bigger turn, High reacts to a smaller one.
 
-**App scope:** choose **Every app** or **Selected apps**. To add an app, bring
-it forward and choose **Apps → Add _App Name_** from the MicAway popover. In selected
+**App scope:** expand **Advanced**, then choose **Every app** or **Selected apps**.
+To add an app, bring it forward and choose **Allowed apps → Add _App Name_**. In selected
 mode, automatic muting is active only when every identified app consuming mic
 input is selected.
 

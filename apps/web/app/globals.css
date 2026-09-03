@@ -520,26 +520,6 @@ button {
   border-radius: 50%;
 }
 
-.shot-select {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.shot-select b {
-  min-width: 88px;
-  padding: 5px 8px;
-  font-weight: 600;
-  color: var(--ink);
-  text-align: left;
-  background: #ecebe7;
-  border-radius: 6px;
-}
-
 .shot-advanced {
   margin-top: 11px;
   font-size: 11px;

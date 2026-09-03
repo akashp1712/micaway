@@ -30,7 +30,7 @@
 </p>
 
 > [!IMPORTANT]
-> **Version 0.5 is a universal developer preview** (Apple silicon + Intel), ad-hoc signed but not yet Developer ID signed or notarized. It is free to download and audit, but macOS will ask you to approve the first launch. Notarized distribution can come later; the source and behavior are available now.
+> **Version 0.5.1 is a universal developer preview** (Apple silicon + Intel), ad-hoc signed but not yet Developer ID signed or notarized. It is free to download and audit, but macOS will ask you to approve the first launch. Notarized distribution can come later; the source and behavior are available now.
 
 ## The problem
 
@@ -73,7 +73,7 @@ state, and macOS behavior. If a combination behaves differently, please file a
 
 ## Install the preview
 
-1. Download `MicAway-0.5.0-universal.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest) and, optionally, verify it against `MicAway-0.5.0-universal.sha256` with `shasum -a 256 -c MicAway-0.5.0-universal.sha256`.
+1. Download `MicAway-0.5.1-universal.zip` from the [latest release](https://github.com/akashp1712/micaway/releases/latest) and, optionally, verify it against `MicAway-0.5.1-universal.sha256` with `shasum -a 256 -c MicAway-0.5.1-universal.sha256`.
 2. Unzip it and move `MicAway.app` to **Applications**.
 3. Try to open MicAway. If macOS blocks it, open **System Settings → Privacy & Security**, scroll to **Security**, choose **Open Anyway**, and confirm **Open**.
 4. If macOS still refuses to open the unsigned preview, run the following commands in Terminal:
@@ -91,7 +91,7 @@ state, and macOS behavior. If a combination behaves differently, please file a
 Then tune it to how you work:
 
 - **Turnaway muting** is the master switch. Switch it off while moving around; switching it back on re-centers to your current position before automatic muting resumes.
-- **Use in** can apply automatic muting in every app or only selected apps. To add an app, bring it forward, open MicAway, choose **Selected apps**, then choose **Apps → Add _App Name_**. If any unselected app is also using the microphone, automatic muting stays safely inactive.
+- **Advanced → Use in** can apply automatic muting in every app or only selected apps. To add an app, bring it forward, open MicAway, choose **Selected apps**, then choose **Allowed apps → Add _App Name_**. If any unselected app is also using the microphone, automatic muting stays safely inactive.
 - **Advanced → Sensitivity** (Low / Medium / High) sets how far you can turn before the mic mutes. Medium is the default (mute past ~45°, restore under ~28°); Low tolerates a bigger turn, High reacts to a smaller one.
 
 MicAway lives in the menu bar. It runs on macOS 14 or newer and is a universal binary — native on Apple silicon (M1–M4) and Intel Macs.
@@ -136,7 +136,7 @@ Package the universal release archive and checksum with:
 
 ```bash
 cd apps/mac
-./scripts/package-release.sh 0.5.0
+./scripts/package-release.sh 0.5.1
 ```
 
 ## Repository map

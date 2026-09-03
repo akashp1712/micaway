@@ -69,10 +69,6 @@ export function AppShot({
           <span>Turnaway muting</span>
           <i />
         </div>
-        <div className="shot-select">
-          <span>Use in</span>
-          <b>Every app</b>
-        </div>
         <div className="shot-advanced">› Advanced</div>
         <div className="shot-actions">
           <button tabIndex={-1} type="button">
