@@ -1,16 +1,16 @@
-# Install MicAway 0.5.1
+# Install MicAway 0.5.2
 
 Official release page: https://github.com/akashp1712/micaway/releases/latest
 
 ## Download
 
-1. Download `MicAway-0.5.1-universal.zip` from the official latest release.
-2. Optionally download `MicAway-0.5.1-universal.sha256` and verify it with `shasum -a 256 -c MicAway-0.5.1-universal.sha256`.
+1. Download `MicAway-0.5.2-universal.zip` from the official latest release.
+2. Optionally download `MicAway-0.5.2-universal.sha256` and verify it with `shasum -a 256 -c MicAway-0.5.2-universal.sha256`.
 3. Unzip the archive and move `MicAway.app` to Applications.
 
 ## First launch
 
-Version 0.5.1 is ad-hoc signed but is not Developer ID signed or notarized. If macOS blocks it, open System Settings, choose Privacy & Security, scroll to Security, select Open Anyway, and confirm Open.
+Version 0.5.2 is ad-hoc signed but is not Developer ID signed or notarized. If macOS blocks it, open System Settings, choose Privacy & Security, scroll to Security, select Open Anyway, and confirm Open.
 
 If macOS still refuses the official release, run:
 
@@ -29,4 +29,4 @@ Run that command only for `MicAway.app` downloaded from the official MicAway Git
 4. Expand Advanced and choose Every app or Selected apps under Use in.
 5. In Selected Apps mode, bring a voice app forward, open MicAway, and choose Allowed apps, then Add App Name.
 
-The Turnaway Muting switch pauses automatic behavior. When it is switched back on, MicAway safely re-centers to the user's current position. Use the voice or meeting app's normal mute control for deliberate muting; MicAway does not undo a mute it did not create.
+The Turnaway Muting switch pauses automatic behavior. Press ⌥⌘M from anywhere to toggle it. When it is switched back on, MicAway safely re-centers to the user's current position. Use the voice or meeting app's normal mute control for deliberate muting; MicAway does not undo a mute it did not create.

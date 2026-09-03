@@ -42,7 +42,7 @@ To add an app, bring it forward and choose **Allowed apps → Add _App Name_**. 
 mode, automatic muting is active only when every identified app consuming mic
 input is selected.
 
-**Moving around:** switch **Turnaway muting** off before carrying or moving the
+**Moving around:** switch **Turnaway muting** off (`⌥⌘M`) before carrying or moving the
 Mac. Switching it back on safely re-centers to the current position.
 
 Use the voice or meeting app's normal mute control for deliberate manual mute.

@@ -31,7 +31,7 @@ for arch in "${ARCHS[@]}"; do
 
   # 2) MicAwayApp importing the core module
   xcrun swiftc -O -target "$target" -I "$archdir" \
-    -framework AppKit -framework CoreAudio -framework CoreMotion \
+    -framework AppKit -framework Carbon -framework CoreAudio -framework CoreMotion \
     "$archdir/MicAwayCore.o" "${APP_SRCS[@]}" \
     -o "$archdir/MicAway"
 

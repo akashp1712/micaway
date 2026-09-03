@@ -233,17 +233,21 @@ export function AttentionDemo() {
             src={AWAY}
           />
         </div>
-        <div className="scene-card">
-          <span>
-            <i className={listening ? "is-live" : undefined} /> MicAway
-            <code>{yaw}°</code>
-          </span>
-          <strong>{listening ? "Listening" : "Not for your Mac"}</strong>
-          <small>
-            {listening
-              ? "The prompt reaches the agent."
-              : "The aside stays between you two."}
-          </small>
+        <div className="scene-menu" aria-hidden="true">
+          <Image
+            alt=""
+            className={listening ? "is-shown" : undefined}
+            height={321}
+            src="/images/menu/listening.png"
+            width={356}
+          />
+          <Image
+            alt=""
+            className={listening ? undefined : "is-shown"}
+            height={321}
+            src="/images/menu/away.png"
+            width={356}
+          />
         </div>
       </div>
 
