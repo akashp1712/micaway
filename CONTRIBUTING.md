@@ -9,6 +9,8 @@ Thanks for helping make voice work less awkward.
 - Improve accessibility, documentation, or the first-run experience.
 - Propose a focused implementation with tests where the behavior can be isolated.
 
+Product direction lives in [ROADMAP.md](ROADMAP.md). Use the idea issue form to argue for or against something there.
+
 For compatibility results, use the compatibility issue form. Include the selected input device and whether MicAway muted and restored it correctly. Never include private dictated text, recordings, credentials, or logs you have not reviewed.
 
 ## Local setup

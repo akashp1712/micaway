@@ -1,0 +1,45 @@
+name: Product idea
+description: Propose or argue a MicAway direction. Read ROADMAP.md first.
+title: "[Idea]: "
+labels:
+  - idea
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read [ROADMAP.md](https://github.com/akashp1712/micaway/blob/main/ROADMAP.md) before filing.
+        This is for product direction, not a bug. Never include private dictated text or recordings.
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Lane
+      options:
+        - Mac app (geometry, mute, gesture)
+        - Trust and distribution (signing, install, virtual input)
+        - Hardware / separate product
+        - Something not on the roadmap
+    validations:
+      required: true
+  - type: textarea
+    id: desk
+    attributes:
+      label: What breaks or is missing at your desk
+      description: Setup (displays, AirPods, voice app) and the moment MicAway gets it wrong — or a job it does not cover.
+      placeholder: Ultrawide 49" — looking at the far right of the screen mutes dictation even though I am still talking to the Mac.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you think MicAway should do
+      description: A behavior, not a feature name. If this needs audio or a camera, say so explicitly.
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Does this still work if MicAway never hears you
+      description: Yes, no, or only as a separate product. See the constraint in ROADMAP.md.
+      placeholder: Yes — it only needs a wider yaw calibration.
+    validations:
+      required: true
