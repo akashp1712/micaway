@@ -4,6 +4,7 @@ import SwiftUI
 struct MenuBarContentView: View {
     @ObservedObject var model: AppModel
     @State private var advancedExpanded = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var signalColor: Color {
         if !model.turnawayEnabled || !model.activeApplicationAllowed {
@@ -33,10 +34,13 @@ struct MenuBarContentView: View {
 
             Text(model.statusTitle)
                 .font(.system(size: 27, weight: .medium, design: .rounded))
-                .contentTransition(.numericText())
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, minHeight: 33, alignment: .leading)
             Text(model.statusDetail)
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, minHeight: 32, alignment: .topLeading)
                 .padding(.top, 5)
 
             Divider()
@@ -89,8 +93,9 @@ struct MenuBarContentView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .disclosureGroupStyle(RowDisclosureGroupStyle())
             .font(.system(size: 12))
-            .padding(.top, 12)
+            .padding(.top, 8)
 
             HStack(spacing: 8) {
                 if model.canCalibrate {
@@ -108,6 +113,55 @@ struct MenuBarContentView: View {
         }
         .padding(18)
         .frame(width: 300)
-        .animation(.easeOut(duration: 0.16), value: model.intentState)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.16), value: advancedExpanded)
+    }
+}
+
+/// Makes the whole Advanced row the hit target — native DisclosureGroup on
+/// macOS only accepts clicks on the chevron, which is too small in a popover.
+private struct RowDisclosureGroupStyle: DisclosureGroupStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Header(configuration: configuration)
+            if configuration.isExpanded {
+                configuration.content
+            }
+        }
+    }
+
+    private struct Header: View {
+        let configuration: DisclosureGroupStyleConfiguration
+        @State private var hovered = false
+
+        var body: some View {
+            Button {
+                configuration.isExpanded.toggle()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(configuration.isExpanded ? 90 : 0))
+                    configuration.label
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 6)
+                .contentShape(Rectangle())
+                .background(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.primary.opacity(hovered ? 0.06 : 0))
+                )
+                .padding(.horizontal, -6)
+            }
+            .buttonStyle(.plain)
+            .onHover { hovered = $0 }
+            .accessibilityValue(configuration.isExpanded ? "Expanded" : "Collapsed")
+            .accessibilityHint(
+                configuration.isExpanded
+                    ? "Hides advanced settings"
+                    : "Shows advanced settings"
+            )
+        }
     }
 }

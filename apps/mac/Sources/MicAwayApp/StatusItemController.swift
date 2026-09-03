@@ -12,17 +12,23 @@ final class StatusItemController {
 
     init(model: AppModel) {
         self.model = model
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // Square length keeps the status button bounds stable when the glyph
+        // changes (pause vs waveform). Variable length shifts the popover
+        // anchor by a few pixels and makes the panel look like it tilts.
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         // A stable identity so the user can ⌘-drag the icon to a visible slot
         // (e.g. out from behind the notch on a crowded menu bar) and have macOS
         // remember that position across launches.
         statusItem.autosaveName = "com.akashpanchal.micaway.statusitem"
 
-        popover = NSPopover()
-        popover.behavior = .transient
-        popover.contentViewController = NSHostingController(
+        let hostingController = NSHostingController(
             rootView: MenuBarContentView(model: model)
         )
+        hostingController.sizingOptions = .preferredContentSize
+
+        popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentViewController = hostingController
 
         if let button = statusItem.button {
             button.target = self
@@ -50,6 +56,8 @@ final class StatusItemController {
             if let image = NSImage(
                 systemSymbolName: symbol,
                 accessibilityDescription: model.statusTitle
+            )?.withSymbolConfiguration(
+                NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
             ) {
                 image.isTemplate = true
                 button.image = image
