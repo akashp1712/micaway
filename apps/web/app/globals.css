@@ -355,6 +355,7 @@ button {
 
 .how-section,
 .workflow-shift,
+.control-section,
 .trust-section,
 .install-section {
   width: min(100%, 1080px);
@@ -365,6 +366,7 @@ button {
 
 .how-section h2,
 .workflow-shift h2,
+.control-section h2,
 .trust-section h2,
 .install-section h2 {
   font-size: clamp(2rem, 4.5vw, 3rem);
@@ -518,12 +520,29 @@ button {
   border-radius: 50%;
 }
 
-.app-shot small {
-  display: block;
-  min-height: 2.9em;
-  margin-top: 14px;
-  font-size: 13px;
-  line-height: 1.45;
+.shot-select {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.shot-select b {
+  min-width: 88px;
+  padding: 5px 8px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: left;
+  background: #ecebe7;
+  border-radius: 6px;
+}
+
+.shot-advanced {
+  margin-top: 11px;
+  font-size: 11px;
   color: var(--muted);
 }
 
@@ -599,6 +618,10 @@ button {
   align-items: center;
 }
 
+.app-chip:hover {
+  opacity: 0.7;
+}
+
 .app-logo {
   display: grid;
   place-items: center;
@@ -644,6 +667,113 @@ button {
   margin-top: 20px;
   font-size: 13px;
   color: var(--muted);
+}
+
+.control-section {
+  padding-top: 12px;
+}
+
+.control-intro {
+  max-width: 32rem;
+  margin: 16px auto 0;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 40px;
+  text-align: left;
+}
+
+.control-card {
+  padding: clamp(24px, 5vw, 40px);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+}
+
+.control-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--signal);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.control-card h3 {
+  max-width: 18rem;
+  margin: 12px 0 0;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+}
+
+.control-card p {
+  max-width: 28rem;
+  margin: 14px 0 28px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.scope-preview,
+.pause-preview {
+  padding: 4px;
+  background: #e7e6e1;
+  border-radius: 11px;
+}
+
+.scope-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.scope-preview span,
+.scope-preview strong {
+  padding: 9px 8px;
+}
+
+.scope-preview strong {
+  font-weight: 600;
+  color: var(--ink);
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.pause-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.pause-preview i {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  background: #aaa9a4;
+  border-radius: 999px;
+}
+
+.pause-preview i::after {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  content: "";
+  background: white;
+  border-radius: 50%;
 }
 
 .trust-section .text-link {
@@ -727,8 +857,8 @@ button {
 
 .settings-guide,
 .terminal-command {
-  overflow: hidden;
   margin-top: 16px;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 14px;
 }
@@ -740,8 +870,8 @@ button {
 .settings-guide-bar,
 .terminal-toolbar {
   display: flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
   min-height: 36px;
   padding: 0 13px;
   border-bottom: 1px solid var(--line);
@@ -831,9 +961,9 @@ button {
 }
 
 .terminal-command pre {
-  overflow-x: auto;
   padding: 17px;
   margin: 0;
+  overflow-x: auto;
   font-size: 12px;
   line-height: 1.7;
 }
@@ -868,8 +998,8 @@ button {
 
 .permission-guide span:first-child {
   color: #287f50;
-  border-color: #b9dcc8;
   background: #f2faf5;
+  border-color: #b9dcc8;
 }
 
 .permission-guide svg {
@@ -911,6 +1041,10 @@ footer {
   .hero-icon {
     width: 96px;
     height: 96px;
+  }
+
+  .control-grid {
+    grid-template-columns: 1fr;
   }
 }
 

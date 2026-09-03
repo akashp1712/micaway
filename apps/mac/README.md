@@ -11,6 +11,8 @@ A tiny, open-source macOS menu-bar utility that uses AirPods head motion to deci
 - Mutes every connected input device that exposes Core Audio's mute property, so voice apps can keep their own microphone selection.
 - Restores only microphones that MicAway muted itself.
 - Recovers from AirPods disconnects, reconnects, swaps, and app restarts.
+- Can restrict automatic muting to selected microphone-using apps; an unselected or unidentified input app safely prevents automatic muting.
+- Can pause turnaway muting and safely re-center when it is resumed.
 
 Most physical Mac microphones expose a system mute switch. A voice app using a virtual or otherwise non-mutable input may still require a MicAway virtual microphone in a future release.
 
@@ -35,7 +37,17 @@ have a healthy toolchain or full Xcode, `swift build` / `swift test` also work.
 you can turn before the mic mutes. Medium (the default) mutes past ~45° and
 restores under ~28°; Low tolerates a bigger turn, High reacts to a smaller one.
 
-**Manual mute:** toggle it from the menu-bar popover or press **⌥⌘M** anywhere.
+**App scope:** choose **Every app** or **Selected apps**. To add an app, bring
+it forward and choose **Apps → Add _App Name_** from the MicAway popover. In selected
+mode, automatic muting is active only when every identified app consuming mic
+input is selected.
+
+**Moving around:** switch **Turnaway muting** off before carrying or moving the
+Mac. Switching it back on safely re-centers to the current position.
+
+Use the voice or meeting app's normal mute control for deliberate manual mute.
+MicAway restores only inputs it muted itself and does not undo a mute that was
+already active elsewhere.
 
 Grant Motion access when macOS asks. Put in your AirPods, open the menu-bar item, face the Mac, and choose **Calibrate**.
 

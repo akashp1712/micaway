@@ -6,7 +6,6 @@ const shots: Record<
     yaw: string;
     title: string;
     detail: string;
-    message: string;
     action: string;
     listening: boolean;
   }
@@ -15,7 +14,6 @@ const shots: Record<
     yaw: "0°",
     title: "Face your Mac",
     detail: "Calibrate once while looking forward.",
-    message: "Motion connected. Face your Mac and calibrate.",
     action: "Calibrate",
     listening: false,
   },
@@ -23,7 +21,6 @@ const shots: Record<
     yaw: "0°",
     title: "Listening",
     detail: "Turn away to pause voice input.",
-    message: "Forward set. The boundary is ready.",
     action: "Calibrate",
     listening: true,
   },
@@ -31,7 +28,6 @@ const shots: Record<
     yaw: "42°",
     title: "Not for your Mac",
     detail: "Your side conversation stays out.",
-    message: "Face your Mac again to continue.",
     action: "Calibrate",
     listening: false,
   },
@@ -70,14 +66,14 @@ export function AppShot({
         <p>{shot.detail}</p>
         <hr />
         <div className="shot-toggle">
-          <span>Turnaway guard</span>
+          <span>Turnaway muting</span>
           <i />
         </div>
-        <div className="shot-toggle">
-          <span>Mute mic when turned away</span>
-          <i />
+        <div className="shot-select">
+          <span>Use in</span>
+          <b>Every app</b>
         </div>
-        <small>{shot.message}</small>
+        <div className="shot-advanced">› Advanced</div>
         <div className="shot-actions">
           <button tabIndex={-1} type="button">
             {shot.action}

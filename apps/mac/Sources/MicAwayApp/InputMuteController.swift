@@ -18,11 +18,6 @@ final class InputMuteController: @unchecked Sendable {
 
     private var devicesMutedByUs = Set<AudioObjectID>()
 
-    func canMuteInput() -> Bool {
-        guard let devices = try? muteCapableInputDevices() else { return false }
-        return !devices.isEmpty
-    }
-
     func muteForTurnaway() throws {
         let devices = try muteCapableInputDevices()
         guard !devices.isEmpty else { throw GateError.noInputDevices }

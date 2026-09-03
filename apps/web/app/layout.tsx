@@ -34,6 +34,10 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
+      <head>
+        <link href="/product.md" rel="alternate" type="text/markdown" />
+        <link href="/llms.txt" rel="alternate" type="text/plain" />
+      </head>
       <body
         className="min-h-dvh bg-background text-foreground"
         suppressHydrationWarning

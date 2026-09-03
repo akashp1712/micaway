@@ -13,16 +13,19 @@ const voiceApps = [
     name: "ChatGPT Voice",
     logo: "/brands/chatgpt.webp",
     className: "chatgpt-logo",
+    href: "https://help.openai.com/en/articles/20001274/?utm_source=micaway&utm_medium=referral&utm_campaign=compatible_voice_apps",
   },
   {
     name: "Wispr Flow",
     logo: "/brands/wispr-flow.png",
     className: "wispr-logo",
+    href: "https://wisprflow.ai/?utm_source=micaway&utm_medium=referral&utm_campaign=compatible_voice_apps",
   },
   {
     name: "FluidVoice",
     logo: "/brands/fluidvoice-mark.png",
     className: "fluidvoice-logo",
+    href: "https://fluidvoice.org/?utm_source=micaway&utm_medium=referral&utm_campaign=compatible_voice_apps",
   },
 ] as const;
 
@@ -118,7 +121,13 @@ export default function HomePage() {
         <h2 id="workflow-title">Works where voice stays open.</h2>
         <div className="app-list">
           {voiceApps.map((app) => (
-            <article className="app-chip" key={app.name}>
+            <a
+              className="app-chip"
+              href={app.href}
+              key={app.name}
+              rel="noreferrer"
+              target="_blank"
+            >
               <span className={`app-logo ${app.className}`}>
                 <Image
                   alt=""
@@ -129,13 +138,47 @@ export default function HomePage() {
                 />
               </span>
               <h3>{app.name}</h3>
-            </article>
+            </a>
           ))}
         </div>
         <p className="trademark-note">
           Independent project. Not affiliated with Wispr Flow, FluidVoice, or
           OpenAI.
         </p>
+      </section>
+
+      <section aria-labelledby="control-title" className="control-section">
+        <h2 id="control-title">Keep it on your terms.</h2>
+        <p className="control-intro">
+          Automatic when you want it. Completely out of the way when you do not.
+        </p>
+        <div className="control-grid">
+          <article className="control-card">
+            <span className="control-kicker">Selected Apps</span>
+            <h3>Use it for dictation, not meetings.</h3>
+            <p>
+              Choose the voice apps where turnaway muting belongs. If an
+              unselected meeting app is using your microphone, MicAway stays
+              inactive.
+            </p>
+            <div aria-hidden="true" className="scope-preview">
+              <span>Every app</span>
+              <strong>Selected apps</strong>
+            </div>
+          </article>
+          <article className="control-card">
+            <span className="control-kicker">Pause Anywhere</span>
+            <h3>Move the laptop without fighting it.</h3>
+            <p>
+              Switch turnaway muting off while walking around the office. Turn
+              it back on and MicAway safely re-centers to your current position.
+            </p>
+            <div aria-hidden="true" className="pause-preview">
+              <span>Turnaway muting</span>
+              <i />
+            </div>
+          </article>
+        </div>
       </section>
 
       <section aria-labelledby="trust-title" className="trust-section">

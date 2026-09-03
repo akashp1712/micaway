@@ -8,7 +8,6 @@ final class StatusItemController {
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private var cancellables = Set<AnyCancellable>()
-    private var hotKey: GlobalHotKey?
     private var lastSymbol: String?
 
     init(model: AppModel) {
@@ -38,10 +37,6 @@ final class StatusItemController {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.updateButtonImage() }
             .store(in: &cancellables)
-
-        hotKey = GlobalHotKey.micAwayToggle { [weak model] in
-            model?.manualMuteEngaged.toggle()
-        }
     }
 
     private func updateButtonImage() {

@@ -2,33 +2,27 @@ import Testing
 @testable import MicAwayCore
 
 struct MuteResolverTests {
-    @Test func manualMuteForcesMute() {
+    @Test func turnawayMutesWhenEnabledInAllowedApp() {
         #expect(MuteResolver.shouldMute(
-            manualMuteEngaged: true, guardEnabled: false,
-            microphoneGateEnabled: false, intentState: .listening))
-    }
-
-    @Test func turnawayMutesWhenGuardAndGateOn() {
-        #expect(MuteResolver.shouldMute(
-            manualMuteEngaged: false, guardEnabled: true,
-            microphoneGateEnabled: true, intentState: .turnaway))
+            turnawayEnabled: true,
+            applicationAllowed: true, intentState: .turnaway))
     }
 
     @Test func listeningDoesNotMute() {
         #expect(!MuteResolver.shouldMute(
-            manualMuteEngaged: false, guardEnabled: true,
-            microphoneGateEnabled: true, intentState: .listening))
+            turnawayEnabled: true,
+            applicationAllowed: true, intentState: .listening))
     }
 
-    @Test func guardOffSuppressesMotionMute() {
+    @Test func turnawayOffSuppressesMotionMute() {
         #expect(!MuteResolver.shouldMute(
-            manualMuteEngaged: false, guardEnabled: false,
-            microphoneGateEnabled: true, intentState: .turnaway))
+            turnawayEnabled: false,
+            applicationAllowed: true, intentState: .turnaway))
     }
 
-    @Test func gateOffSuppressesMotionMute() {
+    @Test func blockedApplicationSuppressesMotionMute() {
         #expect(!MuteResolver.shouldMute(
-            manualMuteEngaged: false, guardEnabled: true,
-            microphoneGateEnabled: false, intentState: .turnaway))
+            turnawayEnabled: true,
+            applicationAllowed: false, intentState: .turnaway))
     }
 }

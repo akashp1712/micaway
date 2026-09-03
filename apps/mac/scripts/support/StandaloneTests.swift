@@ -152,21 +152,45 @@ check(Sensitivity.allCases == [.low, .medium, .high],
 
 // MARK: - MuteResolverTests
 
-check(MuteResolver.shouldMute(manualMuteEngaged: true, guardEnabled: false,
-                              microphoneGateEnabled: false, intentState: .listening),
-      "manual mute forces mute regardless of gates")
-check(MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: true,
-                              microphoneGateEnabled: true, intentState: .turnaway),
-      "turnaway mutes when guard + gate on")
-check(!MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: true,
-                               microphoneGateEnabled: true, intentState: .listening),
+check(MuteResolver.shouldMute(turnawayEnabled: true,
+                              applicationAllowed: true,
+                              intentState: .turnaway),
+      "turnaway mutes when enabled in an allowed app")
+check(!MuteResolver.shouldMute(turnawayEnabled: true,
+                               applicationAllowed: true,
+                               intentState: .listening),
       "listening does not mute")
-check(!MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: false,
-                               microphoneGateEnabled: true, intentState: .turnaway),
-      "guard off suppresses motion mute")
-check(!MuteResolver.shouldMute(manualMuteEngaged: false, guardEnabled: true,
-                               microphoneGateEnabled: false, intentState: .turnaway),
-      "gate off suppresses motion mute")
+check(!MuteResolver.shouldMute(turnawayEnabled: false,
+                               applicationAllowed: true,
+                               intentState: .turnaway),
+      "pause suppresses automatic motion mute")
+check(!MuteResolver.shouldMute(turnawayEnabled: true,
+                               applicationAllowed: false,
+                               intentState: .turnaway),
+      "blocked application suppresses motion mute")
+
+// MARK: - ApplicationScopePolicyTests
+
+check(ApplicationScopePolicy.allowsAutomaticMuting(
+        selectedBundleIdentifiers: ["org.example.dictation"],
+        activeInputBundleIdentifiers: ["org.example.dictation"],
+        hasUnidentifiedInputApplication: false),
+      "selected voice app allows automatic muting")
+check(!ApplicationScopePolicy.allowsAutomaticMuting(
+        selectedBundleIdentifiers: ["org.example.dictation"],
+        activeInputBundleIdentifiers: ["org.example.dictation", "org.example.meeting"],
+        hasUnidentifiedInputApplication: false),
+      "meeting app vetoes automatic muting")
+check(!ApplicationScopePolicy.allowsAutomaticMuting(
+        selectedBundleIdentifiers: ["org.example.dictation"],
+        activeInputBundleIdentifiers: [],
+        hasUnidentifiedInputApplication: false),
+      "no active input does not mute")
+check(!ApplicationScopePolicy.allowsAutomaticMuting(
+        selectedBundleIdentifiers: ["org.example.dictation"],
+        activeInputBundleIdentifiers: ["org.example.dictation"],
+        hasUnidentifiedInputApplication: true),
+      "unidentified input fails open")
 
 if failures == 0 {
     print("ALL PASS")

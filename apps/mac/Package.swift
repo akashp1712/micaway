@@ -20,8 +20,7 @@ let package = Package(
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("CoreAudio"),
-                .linkedFramework("CoreMotion"),
-                .linkedFramework("Carbon")
+                .linkedFramework("CoreMotion")
             ]
         ),
         .testTarget(

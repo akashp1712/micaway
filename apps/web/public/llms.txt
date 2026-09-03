@@ -1,0 +1,24 @@
+# MicAway
+
+> MicAway is an open-source macOS menu-bar app that uses supported AirPods head direction to mute writable microphone inputs when the wearer turns away from the Mac. It does not record, transcribe, or transmit audio.
+
+Official website: https://micaway.akashpanchal.com/
+Source: https://github.com/akashp1712/micaway
+Latest release: https://github.com/akashp1712/micaway/releases/latest
+License: MIT
+
+## Product documentation
+
+- [Product overview](https://micaway.akashpanchal.com/product.md): purpose, features, privacy, requirements, and limitations
+- [Compatibility](https://micaway.akashpanchal.com/compatibility.md): supported hardware, voice apps, and app-scoping behavior
+- [Installation](https://micaway.akashpanchal.com/install.md): download, checksum, first-launch, and setup instructions
+
+## Key facts
+
+- Current version: 0.5.0 developer preview
+- Requires macOS 14 or newer
+- Universal binary for Apple silicon and Intel Macs
+- Head tracking requires AirPods with dynamic head tracking
+- Selected Apps mode fails open: an unselected or unidentified app using microphone input prevents automatic muting
+- The public binary is ad-hoc signed, not Developer ID signed or notarized
+- MicAway is independent and is not affiliated with Apple, OpenAI, Wispr Flow, or FluidVoice

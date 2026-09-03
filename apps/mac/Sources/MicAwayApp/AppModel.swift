@@ -9,22 +9,11 @@ final class AppModel: ObservableObject {
     @Published private(set) var relativeYawDegrees: Double = 0
     @Published private(set) var motionStatus: HeadphoneMotionService.Status = .looking
     @Published private(set) var message = "Connect your AirPods and face your Mac."
-    @Published var guardEnabled = true {
-        didSet { guardEnabledChanged() }
-    }
-    @Published var microphoneGateEnabled: Bool {
+    @Published var turnawayEnabled: Bool {
         didSet {
-            UserDefaults.standard.set(
-                microphoneGateEnabled,
-                forKey: Self.microphoneGateDefaultsKey
-            )
-            microphoneGateEnabledChanged()
-        }
-    }
-    @Published var manualMuteEngaged = false {
-        didSet {
-            guard manualMuteEngaged != oldValue else { return }
-            applyMuteState()
+            guard turnawayEnabled != oldValue else { return }
+            UserDefaults.standard.set(turnawayEnabled, forKey: Self.turnawayEnabledDefaultsKey)
+            turnawayEnabledChanged()
         }
     }
     @Published var sensitivity: Sensitivity {
@@ -37,20 +26,55 @@ final class AppModel: ObservableObject {
             reconfigureEngine()
         }
     }
+    @Published var applicationScope: ApplicationScope {
+        didSet {
+            guard applicationScope != oldValue else { return }
+            UserDefaults.standard.set(applicationScope.rawValue, forKey: Self.applicationScopeDefaultsKey)
+            applyMuteState()
+        }
+    }
+    @Published private(set) var activeApplication: ScopedApplication?
+    @Published private(set) var selectedApplications: [ScopedApplication]
+    @Published private(set) var audioInputSnapshot = AudioInputSnapshot()
 
     private var latestYawRadians: Double?
     private var engine = TurnawayEngine()
     private let motion = HeadphoneMotionService()
     private let microphone = InputMuteController()
-    private static let microphoneGateDefaultsKey = "microphoneGateEnabled"
+    private let audioInputMonitor = AudioInputApplicationMonitor()
+    private var workspaceActivationObserver: NSObjectProtocol?
+    private static let legacyMicrophoneGateDefaultsKey = "microphoneGateEnabled"
     private static let sensitivityDefaultsKey = "sensitivity"
+    private static let turnawayEnabledDefaultsKey = "turnawayEnabled"
+    private static let applicationScopeDefaultsKey = "applicationScope"
+    private static let selectedApplicationsDefaultsKey = "selectedApplications"
 
     var canCalibrate: Bool { latestYawRadians != nil }
-    var microphoneGateAvailable: Bool { microphone.canMuteInput() }
-    var manualMuteAvailable: Bool { microphone.canMuteInput() }
+    var activeApplicationAllowed: Bool {
+        return switch applicationScope {
+        case .everyApp:
+            true
+        case .selectedApps:
+            selectedModeAllowsAutomaticMuting
+        }
+    }
+
+    var activeApplicationSelected: Bool {
+        activeApplication.map { activeApplication in
+            selectedApplications.contains {
+                $0.bundleIdentifier == activeApplication.bundleIdentifier
+            }
+        } ?? false
+    }
+
+    var activeApplicationName: String {
+        activeApplication?.name ?? "the current app"
+    }
 
     var statusTitle: String {
-        switch intentState {
+        if !turnawayEnabled { return "Paused" }
+        if !activeApplicationAllowed { return "Inactive here" }
+        return switch intentState {
         case .needsCalibration: "Face your Mac"
         case .listening: "Listening"
         case .turnaway: "Not for your Mac"
@@ -58,7 +82,20 @@ final class AppModel: ObservableObject {
     }
 
     var statusDetail: String {
-        switch intentState {
+        if !turnawayEnabled {
+            return "Turnaway muting is off. Your other mic controls are unchanged."
+        }
+        if !activeApplicationAllowed {
+            if audioInputSnapshot.hasUnidentifiedApplication {
+                return "MicAway could not identify the voice app, so it stays safely inactive."
+            }
+            if audioInputSnapshot.applications.isEmpty {
+                return "Waiting for a selected app to use the microphone."
+            }
+            let names = audioInputSnapshot.applications.map(\.name).joined(separator: ", ")
+            return "Automatic muting is off while \(names) uses the microphone."
+        }
+        return switch intentState {
         case .needsCalibration:
             "Calibrate once while looking forward."
         case .listening:
@@ -69,7 +106,8 @@ final class AppModel: ObservableObject {
     }
 
     var menuBarSymbol: String {
-        if manualMuteEngaged { return "mic.slash.fill" }
+        if !turnawayEnabled { return "pause.circle.fill" }
+        if !activeApplicationAllowed { return "waveform.circle" }
         return switch intentState {
         case .needsCalibration: "waveform.badge.exclamationmark"
         case .listening: "waveform.circle.fill"
@@ -78,8 +116,10 @@ final class AppModel: ObservableObject {
     }
 
     init() {
-        microphoneGateEnabled = UserDefaults.standard.object(
-            forKey: Self.microphoneGateDefaultsKey
+        turnawayEnabled = UserDefaults.standard.object(
+            forKey: Self.turnawayEnabledDefaultsKey
+        ) as? Bool ?? UserDefaults.standard.object(
+            forKey: Self.legacyMicrophoneGateDefaultsKey
         ) as? Bool ?? true
 
         let storedSensitivity = UserDefaults.standard.string(
@@ -87,6 +127,11 @@ final class AppModel: ObservableObject {
         ).flatMap(Sensitivity.init(rawValue:)) ?? .default
         sensitivity = storedSensitivity
         engine = TurnawayEngine(configuration: storedSensitivity.configuration)
+
+        applicationScope = UserDefaults.standard.string(
+            forKey: Self.applicationScopeDefaultsKey
+        ).flatMap(ApplicationScope.init(rawValue:)) ?? .everyApp
+        selectedApplications = Self.loadSelectedApplications()
 
         motion.onStatus = { [weak self] status in
             self?.motionStatus = status
@@ -102,6 +147,13 @@ final class AppModel: ObservableObject {
         motion.onYaw = { [weak self] yaw, isNewReferenceFrame in
             self?.ingest(yaw: yaw, isNewReferenceFrame: isNewReferenceFrame)
         }
+        audioInputMonitor.onChange = { [weak self] snapshot in
+            guard let self else { return }
+            audioInputSnapshot = snapshot
+            applyMuteState()
+        }
+        observeActiveApplication()
+        audioInputMonitor.start()
         motion.start()
     }
 
@@ -114,6 +166,29 @@ final class AppModel: ObservableObject {
 
     func retryMotion() {
         motion.retry()
+    }
+
+    func setActiveApplicationAllowed(_ allowed: Bool) {
+        guard let activeApplication else { return }
+        selectedApplications.removeAll {
+            $0.bundleIdentifier == activeApplication.bundleIdentifier
+        }
+        if allowed {
+            selectedApplications.append(activeApplication)
+            selectedApplications.sort {
+                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+            }
+        }
+        persistSelectedApplications()
+        objectWillChange.send()
+        applyMuteState()
+    }
+
+    func removeSelectedApplication(_ application: ScopedApplication) {
+        selectedApplications.removeAll { $0.bundleIdentifier == application.bundleIdentifier }
+        persistSelectedApplications()
+        objectWillChange.send()
+        applyMuteState()
     }
 
     func quit() {
@@ -146,7 +221,7 @@ final class AppModel: ObservableObject {
 
     private func apply(_ reading: IntentReading) {
         let previousState = intentState
-        intentState = guardEnabled ? reading.state : .listening
+        intentState = reading.state
         relativeYawDegrees = reading.relativeYawDegrees
 
         guard previousState != intentState else { return }
@@ -172,24 +247,18 @@ final class AppModel: ObservableObject {
         }
     }
 
-    private func guardEnabledChanged() {
-        if !guardEnabled {
-            intentState = engine.state == .needsCalibration ? .needsCalibration : .listening
-        } else if engine.state != .needsCalibration {
-            intentState = engine.state
+    private func turnawayEnabledChanged() {
+        if turnawayEnabled, let latestYawRadians, engine.state != .needsCalibration {
+            apply(engine.reanchor(yawRadians: latestYawRadians))
+            message = "Resumed and re-centered to your current position."
         }
-        applyMuteState()
-    }
-
-    private func microphoneGateEnabledChanged() {
         applyMuteState()
     }
 
     private func applyMuteState() {
         let shouldMute = MuteResolver.shouldMute(
-            manualMuteEngaged: manualMuteEngaged,
-            guardEnabled: guardEnabled,
-            microphoneGateEnabled: microphoneGateEnabled,
+            turnawayEnabled: turnawayEnabled,
+            applicationAllowed: activeApplicationAllowed,
             intentState: intentState
         )
         do {
@@ -200,16 +269,62 @@ final class AppModel: ObservableObject {
             }
         } catch {
             message = error.localizedDescription
-            // Never let the menu-bar icon claim the mic is muted when the mute
-            // actually failed (e.g. ⌥⌘M pressed with no mutable input device).
-            if manualMuteEngaged {
-                manualMuteEngaged = false
-            }
         }
     }
 
     func prepareForTermination() {
+        audioInputMonitor.stop()
         motion.stop()
         try? microphone.restoreIfNeeded()
+    }
+
+    private func observeActiveApplication() {
+        updateActiveApplication(NSWorkspace.shared.frontmostApplication)
+        workspaceActivationObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey]
+                    as? NSRunningApplication else { return }
+            Task { @MainActor in
+                self?.updateActiveApplication(application)
+            }
+        }
+    }
+
+    private func updateActiveApplication(_ application: NSRunningApplication?) {
+        guard let application,
+              application.bundleIdentifier != Bundle.main.bundleIdentifier,
+              let bundleIdentifier = application.bundleIdentifier,
+              let name = application.localizedName,
+              !name.isEmpty else { return }
+
+        let updated = ScopedApplication(bundleIdentifier: bundleIdentifier, name: name)
+        guard updated != activeApplication else { return }
+        activeApplication = updated
+        applyMuteState()
+    }
+
+    private func persistSelectedApplications() {
+        guard let data = try? JSONEncoder().encode(selectedApplications) else { return }
+        UserDefaults.standard.set(data, forKey: Self.selectedApplicationsDefaultsKey)
+    }
+
+    private static func loadSelectedApplications() -> [ScopedApplication] {
+        guard let data = UserDefaults.standard.data(forKey: selectedApplicationsDefaultsKey),
+              let applications = try? JSONDecoder().decode([ScopedApplication].self, from: data)
+        else { return [] }
+        return applications
+    }
+
+    private var selectedModeAllowsAutomaticMuting: Bool {
+        ApplicationScopePolicy.allowsAutomaticMuting(
+            selectedBundleIdentifiers: Set(selectedApplications.map(\.bundleIdentifier)),
+            activeInputBundleIdentifiers: Set(
+                audioInputSnapshot.applications.map(\.bundleIdentifier)
+            ),
+            hasUnidentifiedInputApplication: audioInputSnapshot.hasUnidentifiedApplication
+        )
     }
 }

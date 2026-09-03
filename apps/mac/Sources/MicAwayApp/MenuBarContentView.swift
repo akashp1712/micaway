@@ -3,9 +3,13 @@ import SwiftUI
 
 struct MenuBarContentView: View {
     @ObservedObject var model: AppModel
+    @State private var advancedExpanded = false
 
     private var signalColor: Color {
-        switch model.intentState {
+        if !model.turnawayEnabled || !model.activeApplicationAllowed {
+            return .secondary
+        }
+        return switch model.intentState {
         case .needsCalibration: .secondary
         case .listening: Color(red: 0.11, green: 0.50, blue: 0.29)
         case .turnaway: .primary.opacity(0.32)
@@ -36,39 +40,59 @@ struct MenuBarContentView: View {
                 .padding(.top, 5)
 
             Divider()
-                .padding(.vertical, 20)
+                .padding(.vertical, 16)
 
-            Toggle("Turnaway guard", isOn: $model.guardEnabled)
+            Toggle("Turnaway muting", isOn: $model.turnawayEnabled)
                 .toggleStyle(.switch)
 
-            Toggle("Mute mic when turned away", isOn: $model.microphoneGateEnabled)
-                .toggleStyle(.switch)
-                .disabled(!model.microphoneGateAvailable)
-                .padding(.top, 10)
+            Picker("Use in", selection: $model.applicationScope) {
+                ForEach(ApplicationScope.allCases) { scope in
+                    Text(scope.label).tag(scope)
+                }
+            }
+            .pickerStyle(.menu)
+            .padding(.top, 8)
 
-            Toggle("Mute mic now (⌥⌘M)", isOn: $model.manualMuteEngaged)
-                .toggleStyle(.switch)
-                .disabled(!model.manualMuteAvailable)
-                .padding(.top, 10)
+            if model.applicationScope == .selectedApps {
+                Menu("Apps (\(model.selectedApplications.count))") {
+                    Button(
+                        model.activeApplicationSelected
+                            ? "Remove \(model.activeApplicationName)"
+                            : "Add \(model.activeApplicationName)"
+                    ) {
+                        model.setActiveApplicationAllowed(!model.activeApplicationSelected)
+                    }
+                    .disabled(model.activeApplication == nil)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Turn sensitivity")
-                    .font(.system(size: 13))
-                Picker("Turn sensitivity", selection: $model.sensitivity) {
-                    ForEach(Sensitivity.allCases) { level in
-                        Text(level.label).tag(level)
+                    if !model.selectedApplications.isEmpty {
+                        Divider()
+                        ForEach(model.selectedApplications) { application in
+                            Button("Remove \(application.name)") {
+                                model.removeSelectedApplication(application)
+                            }
+                        }
                     }
                 }
-                .labelsHidden()
-                .pickerStyle(.segmented)
+                .padding(.top, 4)
             }
-            .padding(.top, 16)
 
-            Text(model.message)
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 14)
+            DisclosureGroup("Advanced", isExpanded: $advancedExpanded) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Picker("Sensitivity", selection: $model.sensitivity) {
+                        ForEach(Sensitivity.allCases) { level in
+                            Text(level.label).tag(level)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    Text(model.message)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .font(.system(size: 12))
+            .padding(.top, 10)
 
             HStack(spacing: 8) {
                 if model.canCalibrate {
@@ -82,10 +106,10 @@ struct MenuBarContentView: View {
                 Button("Quit") { model.quit() }
                     .keyboardShortcut("q", modifiers: [.command])
             }
-            .padding(.top, 18)
+            .padding(.top, 16)
         }
-        .padding(20)
-        .frame(width: 320)
+        .padding(18)
+        .frame(width: 300)
         .animation(.easeOut(duration: 0.16), value: model.intentState)
     }
 }
