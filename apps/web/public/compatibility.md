@@ -1,8 +1,8 @@
 # MicAway compatibility
 
-Last updated: 2026-09-03
+Last updated: 2026-09-21
 
-Current version: 0.5.2
+Current version: 0.5.3
 
 ## System compatibility
 
@@ -24,6 +24,8 @@ MicAway works at the macOS input-device layer rather than integrating with a voi
 Selected Apps mode uses Core Audio process information to identify applications currently consuming microphone input. Automatic turnaway muting is enabled only when every identified input-consuming application is on the user's selected list.
 
 If a meeting app is using the microphone and is not selected, automatic muting stays inactive. If macOS reports an input consumer without an identifiable bundle, MicAway also stays inactive. This is a fail-open safety choice intended to avoid accidental muting in meetings.
+
+Protected apps on the Never mute during list also stand down automatic muting in every scope mode while they are capturing input. Zoom, Teams, Slack, FaceTime, Discord, and Webex are seeded on first launch. Browser-based meetings are added by bringing the browser forward and adding it to that list.
 
 App selection is application-wide. A browser is treated as one application; MicAway cannot distinguish a voice tab from a meeting tab in the same browser.
 

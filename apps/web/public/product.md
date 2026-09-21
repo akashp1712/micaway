@@ -1,8 +1,8 @@
 # MicAway product overview
 
-Last updated: 2026-09-03
+Last updated: 2026-09-21
 
-Current version: 0.5.2 developer preview
+Current version: 0.5.3 developer preview
 
 Official website: https://micaway.akashpanchal.com/
 
@@ -23,8 +23,9 @@ Continuous voice tools can mistake a side conversation for input. Keyboard short
 ## Features
 
 - AirPods head-direction gesture with dwell and hysteresis to reduce accidental state changes
-- Low, Medium, and High turn-sensitivity presets
+- Continuous mute-past-angle sensitivity slider (25–65°, default 45°)
 - Every App and Selected Apps operating modes
+- Never mute during list that stands down automatic muting while a protected meeting app is on the microphone
 - Safety behavior that disables automatic muting when an unselected or unidentified app is using microphone input
 - Master Turnaway Muting switch for carrying or repositioning a laptop
 - Safe re-centering when automatic muting is resumed
@@ -41,7 +42,7 @@ Users should use the normal mute control in their voice or meeting app for delib
 
 ## Distribution
 
-MicAway is free and open source under the MIT License. Version 0.5.2 is a universal developer preview. Its downloadable application is ad-hoc signed but is not Developer ID signed or notarized, so macOS may require first-launch approval.
+MicAway is free and open source under the MIT License. Version 0.5.3 is a universal developer preview. Its downloadable application is ad-hoc signed but is not Developer ID signed or notarized, so macOS may require first-launch approval.
 
 ## Limitations
 

@@ -33,14 +33,18 @@ even when a Command Line Tools update leaves `swift build` broken with
 `Invalid manifest ... PackageDescription.Package.__allocating_init`. If you
 have a healthy toolchain or full Xcode, `swift build` / `swift test` also work.
 
-**Turn sensitivity:** choose Low / Medium / High in the popover to set how far
-you can turn before the mic mutes. Medium (the default) mutes past ~45° and
-restores under ~28°; Low tolerates a bigger turn, High reacts to a smaller one.
+**Turn sensitivity:** the Advanced slider sets how far you can turn before the
+mic mutes (25–65°, default 45°). Drag toward High for a smaller turn; the
+readout is the mute-past angle.
 
 **App scope:** expand **Advanced**, then choose **Every app** or **Selected apps**.
 To add an app, bring it forward and choose **Allowed apps → Add _App Name_**. In selected
 mode, automatic muting is active only when every identified app consuming mic
 input is selected.
+
+**Never mute during:** automatic muting stands down while a protected app is on
+the microphone. Zoom, Teams, Slack, FaceTime, Discord, and Webex are seeded on
+first launch. For a browser meeting, bring the browser forward and add it.
 
 **Moving around:** switch **Turnaway muting** off (`⌥⌘M`) before carrying or moving the
 Mac. Switching it back on safely re-centers to the current position.
