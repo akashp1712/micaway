@@ -150,6 +150,49 @@ for sensitivity in Sensitivity.allCases {
 check(Sensitivity.allCases == [.low, .medium, .high],
       "preset order is low, medium, high")
 
+// forTurnAngleUsesTheGivenEnterThreshold
+do {
+    let config = TurnawayConfiguration.forTurnAngle(enterThresholdDegrees: 45)
+    check(config.enterThresholdDegrees == 45, "forTurnAngle keeps the enter threshold")
+    check(config.exitThresholdDegrees == 28, "forTurnAngle scales exit to round(enter * 0.62)")
+}
+
+// forTurnAngleClampsToLimits
+check(TurnawayConfiguration.forTurnAngle(enterThresholdDegrees: 5)
+        .enterThresholdDegrees == SensitivityLimits.minDegrees,
+      "forTurnAngle clamps below the minimum")
+check(TurnawayConfiguration.forTurnAngle(enterThresholdDegrees: 120)
+        .enterThresholdDegrees == SensitivityLimits.maxDegrees,
+      "forTurnAngle clamps above the maximum")
+
+// forTurnAngleKeepsHysteresisAcrossTheRange
+do {
+    var keepsHysteresis = true
+    for degrees in stride(from: SensitivityLimits.minDegrees,
+                          through: SensitivityLimits.maxDegrees,
+                          by: 1) {
+        let config = TurnawayConfiguration.forTurnAngle(enterThresholdDegrees: degrees)
+        if config.enterThresholdDegrees <= config.exitThresholdDegrees {
+            keepsHysteresis = false
+        }
+    }
+    check(keepsHysteresis, "forTurnAngle keeps enter > exit across the range")
+}
+
+// forTurnAngleGivesBiggerTurnsALongerDwell
+do {
+    let sensitive = TurnawayConfiguration.forTurnAngle(
+        enterThresholdDegrees: SensitivityLimits.minDegrees
+    )
+    let deliberate = TurnawayConfiguration.forTurnAngle(
+        enterThresholdDegrees: SensitivityLimits.maxDegrees
+    )
+    check(sensitive.enterDwellSeconds < deliberate.enterDwellSeconds,
+          "forTurnAngle gives bigger turns a longer enter dwell")
+    check(deliberate.exitThresholdDegrees > sensitive.exitThresholdDegrees,
+          "forTurnAngle exit threshold grows with the turn angle")
+}
+
 // MARK: - MuteResolverTests
 
 check(MuteResolver.shouldMute(turnawayEnabled: true,
@@ -191,6 +234,29 @@ check(!ApplicationScopePolicy.allowsAutomaticMuting(
         activeInputBundleIdentifiers: ["org.example.dictation"],
         hasUnidentifiedInputApplication: true),
       "unidentified input fails open")
+
+// MARK: - ProtectedApplicationPolicyTests
+
+check(ProtectedApplicationPolicy.blocksMuting(
+        protectedBundleIdentifiers: ["us.zoom.xos"],
+        activeInputBundleIdentifiers: ["us.zoom.xos"]),
+      "protected app on mic blocks muting")
+check(ProtectedApplicationPolicy.blocksMuting(
+        protectedBundleIdentifiers: ["us.zoom.xos"],
+        activeInputBundleIdentifiers: ["org.example.dictation", "us.zoom.xos"]),
+      "protected app alongside dictation blocks muting")
+check(!ProtectedApplicationPolicy.blocksMuting(
+        protectedBundleIdentifiers: ["us.zoom.xos"],
+        activeInputBundleIdentifiers: ["org.example.dictation"]),
+      "unprotected input does not block muting")
+check(!ProtectedApplicationPolicy.blocksMuting(
+        protectedBundleIdentifiers: ["us.zoom.xos"],
+        activeInputBundleIdentifiers: []),
+      "no active input does not block muting")
+check(!ProtectedApplicationPolicy.blocksMuting(
+        protectedBundleIdentifiers: [],
+        activeInputBundleIdentifiers: ["us.zoom.xos"]),
+      "empty protected list does not block muting")
 
 if failures == 0 {
     print("ALL PASS")

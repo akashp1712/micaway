@@ -77,10 +77,22 @@ export default function HomePage() {
           width={132}
         />
         <p className="hero-name">MicAway</p>
-        <h1 id="hero-title">Not every word is a prompt.</h1>
+        {/*
+          DRAFT — DO NOT DEPLOY until Meeting Mode is validated + built.
+          Spike open question: does device-unmute reliably restore audio in
+          Google Meet? Today the app STANDS DOWN during meetings (protected
+          apps), so this meetings-first hero describes intended behaviour, not
+          shipped behaviour. Previous copy kept below for a clean revert.
+          OLD H1:   Not every word is a prompt.
+          OLD COPY: Face your Mac to speak. Look away, and MicAway mutes the
+                    microphone on your machine — without ever hearing you.
+        */}
+        <h1 id="hero-title">Turn away. You&rsquo;re muted.</h1>
         <p className="hero-copy">
-          Face your Mac to speak. Look away, and MicAway mutes the microphone on
-          your machine — without ever hearing you.
+          Someone leans in mid-call — turn to answer and MicAway mutes you, then
+          brings your mic back when you face your Mac again. No push-to-talk, no
+          scramble for the mute button. Same for dictation: your aside never
+          becomes a prompt. It never hears a word.
         </p>
         <div className="hero-actions">
           <a className="button button-signal" href={downloadUrl}>

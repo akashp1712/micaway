@@ -160,11 +160,41 @@ struct MenuBarContentView: View {
                         .frame(minHeight: 24)
                     }
 
-                    SettingsPicker("Sensitivity", selection: $model.sensitivity) {
-                        ForEach(Sensitivity.allCases) { level in
-                            Text(level.label).tag(level)
+                    HStack(spacing: 8) {
+                        Text("Never mute during")
+                        Spacer(minLength: 8)
+                        Menu {
+                            Button(
+                                model.activeApplicationProtected
+                                    ? "Remove \(model.activeApplicationName)"
+                                    : "Add \(model.activeApplicationName)"
+                            ) {
+                                model.setActiveApplicationProtected(!model.activeApplicationProtected)
+                            }
+                            .disabled(model.activeApplication == nil)
+
+                            if !model.protectedApplications.isEmpty {
+                                Divider()
+                                ForEach(model.protectedApplications) { application in
+                                    Button("Remove \(application.name)") {
+                                        model.removeProtectedApplication(application)
+                                    }
+                                }
+                            }
+                        } label: {
+                            Text("\(model.protectedApplications.count)")
                         }
+                        .fixedSize()
                     }
+                    .frame(minHeight: 24)
+
+                    Text("In a meeting in your browser? Bring it forward and add it here.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    sensitivitySlider
 
                     Text(model.message)
                         .font(.system(size: 11))
@@ -193,6 +223,39 @@ struct MenuBarContentView: View {
         .padding(18)
         .frame(width: 300)
         .font(.system(size: 13))
+    }
+
+    /// Continuous sensitivity control. The stored value is the "mute past this
+    /// angle" degree; a *smaller* angle is *more* sensitive. The slider position
+    /// is mirrored so dragging right raises sensitivity (High), matching the
+    /// Low→High labels, while the readout shows the actual mute angle.
+    private var sensitivitySlider: some View {
+        let min = SensitivityLimits.minDegrees
+        let max = SensitivityLimits.maxDegrees
+        let sliderBinding = Binding<Double>(
+            get: { min + max - model.turnAngleDegrees },
+            set: { model.turnAngleDegrees = (min + max - $0).rounded() }
+        )
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Text("Sensitivity")
+                Spacer(minLength: 8)
+                Text("Mutes past \(Int(model.turnAngleDegrees.rounded()))°")
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            HStack(spacing: 8) {
+                Text("Low")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Slider(value: sliderBinding, in: min...max)
+                    .controlSize(.small)
+                Text("High")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(minHeight: 24)
     }
 
     @ViewBuilder

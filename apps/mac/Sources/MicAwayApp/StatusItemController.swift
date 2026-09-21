@@ -3,13 +3,15 @@ import Combine
 import SwiftUI
 
 @MainActor
-final class StatusItemController {
+final class StatusItemController: NSObject {
     private let model: AppModel
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private var cancellables = Set<AnyCancellable>()
     private var hotKey: GlobalHotKey?
     private var lastIcon: IconKey?
+    private var resignObserver: NSObjectProtocol?
+    private var clickMonitor: Any?
 
     private struct IconKey: Equatable {
         var status: MenuBarStatus
@@ -39,6 +41,10 @@ final class StatusItemController {
         popover.animates = false
         popover.contentViewController = hostingController
 
+        super.init()
+
+        popover.delegate = self
+
         if let button = statusItem.button {
             button.target = self
             button.action = #selector(togglePopover(_:))
@@ -56,11 +62,52 @@ final class StatusItemController {
         hotKey = GlobalHotKey.micAwayToggle { [weak model] in
             model?.turnawayEnabled.toggle()
         }
+
+        // Close when the app stops being active — i.e. the user clicked into
+        // another window, the desktop, or another app. Combined with the
+        // .transient behavior this is the whole dismissal story; no event
+        // monitor is needed (an earlier global monitor made the popover close
+        // on hover). Hovering never resigns active, so this never misfires.
+        resignObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.popover.performClose(nil) }
+        }
     }
 
     func invalidate() {
         hotKey?.invalidate()
         hotKey = nil
+        if let resignObserver {
+            NotificationCenter.default.removeObserver(resignObserver)
+            self.resignObserver = nil
+        }
+        removeClickMonitor()
+    }
+
+    /// Closes the popover on a genuine click into any *other* app — including
+    /// another menu-bar item, whose modal menu tracking never resigns our
+    /// active state, so `didResignActive` alone misses it. Global monitors only
+    /// see events routed to other apps (never our own popover or status button)
+    /// and only mouse-*down* — hover produces no such event, so this cannot
+    /// cause the earlier hover-dismissal. Installed while shown, torn down in
+    /// popoverDidClose.
+    private func installClickMonitor() {
+        guard clickMonitor == nil else { return }
+        clickMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown]
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.popover.performClose(nil) }
+        }
+    }
+
+    private func removeClickMonitor() {
+        if let clickMonitor {
+            NSEvent.removeMonitor(clickMonitor)
+            self.clickMonitor = nil
+        }
     }
 
     private func updateButtonImage() {
@@ -130,22 +177,30 @@ final class StatusItemController {
     @objc private func togglePopover(_ sender: NSStatusBarButton) {
         if popover.isShown {
             popover.performClose(sender)
-            return
+        } else {
+            showPopover()
         }
-        showPopover()
     }
 
-    /// Force the controls on screen regardless of whether the menu-bar icon is
-    /// currently visible. On a notched/crowded bar or inside a full-screen app,
-    /// the status item can be drawn to a hidden menu bar; re-launching MicAway
-    /// (which fires applicationShouldHandleReopen) routes here so the user can
-    /// always reach the UI.
+    /// Presents the panel. Activating the app and making the popover key is what
+    /// makes the accent-colored controls (the switch) render in color rather
+    /// than the desaturated inactive-window state, lets ⌘R/⌘Q work, and makes
+    /// the .transient dismissal reliable for an agent app. Also the reopen path:
+    /// re-launching MicAway fires applicationShouldHandleReopen, which routes
+    /// here so the UI is always reachable even behind a notch.
     func showPopover() {
         guard let button = statusItem.button else { return }
         NSApp.activate(ignoringOtherApps: true)
         if !popover.isShown {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
-        popover.contentViewController?.view.window?.makeKeyAndOrderFront(nil)
+        popover.contentViewController?.view.window?.makeKey()
+        installClickMonitor()
+    }
+}
+
+extension StatusItemController: NSPopoverDelegate {
+    func popoverDidClose(_ notification: Notification) {
+        removeClickMonitor()
     }
 }
