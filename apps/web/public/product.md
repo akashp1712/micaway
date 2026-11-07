@@ -1,8 +1,8 @@
 # MicAway product overview
 
-Last updated: 2026-09-21
+Last updated: 2026-11-07
 
-Current version: 0.5.3 developer preview
+Current version: 0.5.4 developer preview
 
 Official website: https://micaway.akashpanchal.com/
 
@@ -12,7 +12,7 @@ License: MIT
 
 ## What MicAway is
 
-MicAway is a macOS menu-bar utility for people who keep a voice or dictation app open while working. It reads head direction from supported AirPods. After the user calibrates a forward position, MicAway mutes writable microphone inputs when the user turns away and restores only the inputs it muted when the user faces the Mac again.
+MicAway is a macOS menu-bar utility that mutes a call when the user turns away from the Mac and brings the mic back when they face it. It also works with dictation apps. It reads head direction from supported AirPods. After the user calibrates a forward position, MicAway mutes writable microphone inputs when the user turns away and restores only the inputs it muted when the user faces the Mac again.
 
 MicAway does not capture audio, perform transcription, create an account, or send analytics.
 
@@ -25,7 +25,8 @@ Continuous voice tools can mistake a side conversation for input. Keyboard short
 - AirPods head-direction gesture with dwell and hysteresis to reduce accidental state changes
 - Continuous mute-past-angle sensitivity slider (25–65°, default 45°)
 - Every App and Selected Apps operating modes
-- Never mute during list that stands down automatic muting while a protected meeting app is on the microphone
+- Allowed apps seeded with common call apps and browsers; Never mute during starts empty
+- Releases the microphone when head motion stops, and restores inputs it muted after a crash or an AirPods reconnect
 - Safety behavior that disables automatic muting when an unselected or unidentified app is using microphone input
 - Master Turnaway Muting switch for carrying or repositioning a laptop
 - Safe re-centering when automatic muting is resumed
@@ -38,11 +39,11 @@ Continuous voice tools can mistake a side conversation for input. Keyboard short
 - AirPods with dynamic head tracking for turnaway gestures
 - A physical or virtual input device that exposes a writable Core Audio mute property
 
-Users should use the normal mute control in their voice or meeting app for deliberate muting. MicAway restores only input devices that it muted itself.
+MicAway mutes the input device, not the call app's mute button, so the in-app mic icon may stay open while the room hears silence. Users should use the normal mute control in their call or voice app for deliberate muting. MicAway restores only input devices that it muted itself.
 
 ## Distribution
 
-MicAway is free and open source under the MIT License. Version 0.5.3 is a universal developer preview. Its downloadable application is ad-hoc signed but is not Developer ID signed or notarized, so macOS may require first-launch approval.
+MicAway is free and open source under the MIT License. Version 0.5.4 is a universal developer preview. Its downloadable application is ad-hoc signed but is not Developer ID signed or notarized, so macOS may require first-launch approval.
 
 ## Limitations
 

@@ -255,7 +255,7 @@ export function AttentionDemo() {
         <strong>{listening ? "Facing the Mac" : "Looked away"}</strong>
         <span>
           {listening
-            ? "Voice stays in the session. Drag or click the photo to turn."
+            ? "You’re live on the call. Drag or click the photo to turn."
             : "Someone beside you asked a question."}
         </span>
       </p>

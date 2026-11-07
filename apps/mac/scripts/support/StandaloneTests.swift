@@ -196,21 +196,78 @@ do {
 // MARK: - MuteResolverTests
 
 check(MuteResolver.shouldMute(turnawayEnabled: true,
+                              microphoneInUse: true,
                               applicationAllowed: true,
+                              motionLive: true,
                               intentState: .turnaway),
       "turnaway mutes when enabled in an allowed app")
 check(!MuteResolver.shouldMute(turnawayEnabled: true,
+                               microphoneInUse: true,
                                applicationAllowed: true,
+                               motionLive: true,
                                intentState: .listening),
       "listening does not mute")
 check(!MuteResolver.shouldMute(turnawayEnabled: false,
+                               microphoneInUse: true,
                                applicationAllowed: true,
+                               motionLive: true,
                                intentState: .turnaway),
       "pause suppresses automatic motion mute")
 check(!MuteResolver.shouldMute(turnawayEnabled: true,
+                               microphoneInUse: true,
                                applicationAllowed: false,
+                               motionLive: true,
                                intentState: .turnaway),
       "blocked application suppresses motion mute")
+check(!MuteResolver.shouldMute(turnawayEnabled: true,
+                               microphoneInUse: true,
+                               applicationAllowed: true,
+                               motionLive: false,
+                               intentState: .turnaway),
+      "lost motion releases a turnaway mute")
+check(!MuteResolver.shouldMute(turnawayEnabled: true,
+                               microphoneInUse: false,
+                               applicationAllowed: true,
+                               motionLive: true,
+                               intentState: .turnaway),
+      "idle mic is never muted")
+check(MuteResolver.motionIsLive(connected: true, secondsSinceLastSample: 0.2)
+        && !MuteResolver.motionIsLive(connected: true, secondsSinceLastSample: 5)
+        && !MuteResolver.motionIsLive(connected: true, secondsSinceLastSample: nil)
+        && !MuteResolver.motionIsLive(connected: false, secondsSinceLastSample: 0.2),
+      "motion is live only when connected with fresh samples")
+
+// MARK: - MutedInputLedgerTests
+
+do {
+    // restoreFindsARecreatedDeviceByUID
+    var ledger = MutedInputLedger()
+    ledger.recordMuted("airpods-uid")
+    check(ledger.restorable(presentDeviceUIDs: ["airpods-uid", "builtin"]) == ["airpods-uid"],
+          "restore finds a recreated device by UID")
+
+    // absentDeviceStaysPendingUntilItReturns
+    var pending = MutedInputLedger()
+    pending.recordMuted("airpods-uid")
+    check(pending.restorable(presentDeviceUIDs: ["builtin"]).isEmpty && !pending.isEmpty,
+          "absent device stays pending until it returns")
+
+    // restoredDeviceLeavesTheLedger
+    var restored = MutedInputLedger()
+    restored.recordMuted("airpods-uid")
+    restored.recordRestored("airpods-uid")
+    check(restored.isEmpty, "restored device leaves the ledger")
+
+    // ledgerRestoresOnlyWhatItMuted
+    var mine = MutedInputLedger()
+    mine.recordMuted("builtin")
+    check(mine.restorable(presentDeviceUIDs: ["builtin", "user-muted-usb"]) == ["builtin"],
+          "ledger restores only what it muted")
+
+    // ledgerSurvivesARelaunch
+    check(MutedInputLedger(deviceUIDs: mine.deviceUIDs) == mine,
+          "ledger survives a relaunch")
+}
 
 // MARK: - ApplicationScopePolicyTests
 
@@ -257,6 +314,113 @@ check(!ProtectedApplicationPolicy.blocksMuting(
         protectedBundleIdentifiers: [],
         activeInputBundleIdentifiers: ["us.zoom.xos"]),
       "empty protected list does not block muting")
+
+// MARK: - ApplicationListDefaultsTests
+
+do {
+    let zoom = ScopedApplication(bundleIdentifier: "us.zoom.xos", name: "Zoom")
+    let chrome = ScopedApplication(bundleIdentifier: "com.google.Chrome", name: "Google Chrome")
+    let legacySix = ApplicationListDefaults.callApplications
+
+    // freshInstallAllowsCallAppsAndBrowsersAndProtectsNothing
+    let fresh = ApplicationListDefaults.resolve(
+        storedAllowed: nil, storedProtected: nil,
+        didSeedLegacyDefaults: false, didApplyCurrentDefaults: false)
+    check(fresh.protected.isEmpty, "fresh install: Never mute during is empty")
+    let freshAllowed = Set(fresh.allowed.map(\.bundleIdentifier))
+    check(freshAllowed.isSuperset(of: [
+        "us.zoom.xos", "com.microsoft.teams2", "com.tinyspeck.slackmacgap",
+        "com.apple.FaceTime", "com.hnc.Discord", "com.cisco.webexmeetingsapp",
+        "com.google.Chrome", "com.apple.Safari", "company.thebrowser.Browser",
+        "org.mozilla.firefox",
+    ]), "fresh install: Allowed has call apps and browsers")
+
+    // untouchedLegacySeedMovesIntoAllowed
+    let migrated = ApplicationListDefaults.resolve(
+        storedAllowed: [], storedProtected: legacySix.reversed(),
+        didSeedLegacyDefaults: true, didApplyCurrentDefaults: false)
+    check(Set(migrated.allowed) == Set(legacySix) && migrated.allowed.count == 6,
+          "migration: legacy six move into Allowed")
+    check(migrated.protected.isEmpty, "migration: Never mute during cleared")
+
+    // editedNeverMuteListIsNotOverwritten
+    let edited = legacySix.filter { $0 != zoom } + [chrome]
+    let keptProtected = ApplicationListDefaults.resolve(
+        storedAllowed: [], storedProtected: edited,
+        didSeedLegacyDefaults: true, didApplyCurrentDefaults: false)
+    check(keptProtected.protected == edited && keptProtected.allowed.isEmpty,
+          "migration: edited Never mute during is not overwritten")
+
+    // editedAllowedListIsNotOverwritten
+    let keptAllowed = ApplicationListDefaults.resolve(
+        storedAllowed: [chrome], storedProtected: legacySix,
+        didSeedLegacyDefaults: true, didApplyCurrentDefaults: false)
+    check(keptAllowed.allowed == [chrome] && keptAllowed.protected == legacySix,
+          "migration: edited Allowed apps is not overwritten")
+
+    // migrationRunsOnlyOnce
+    let once = ApplicationListDefaults.resolve(
+        storedAllowed: [], storedProtected: legacySix,
+        didSeedLegacyDefaults: true, didApplyCurrentDefaults: true)
+    check(once.allowed.isEmpty && once.protected == legacySix,
+          "migration runs only once")
+
+    // freshSeedLetsZoomMute
+    check(!ProtectedApplicationPolicy.blocksMuting(
+            protectedBundleIdentifiers: Set(fresh.protected.map(\.bundleIdentifier)),
+            activeInputBundleIdentifiers: ["us.zoom.xos"])
+          && ApplicationScopePolicy.allowsAutomaticMuting(
+            selectedBundleIdentifiers: freshAllowed,
+            activeInputBundleIdentifiers: ["us.zoom.xos"],
+            hasUnidentifiedInputApplication: false),
+          "fresh seed lets Zoom mute")
+}
+
+// MARK: - MenuStatusCopyTests
+
+do {
+    func copy(
+        intentState: IntentState = .listening,
+        motionConnected: Bool = true,
+        motionLive: Bool? = nil,
+        allowed: Bool = true,
+        protectedNames: [String] = [],
+        inputNames: [String] = ["Zoom"],
+        selectedAppOnMic: Bool = true,
+        motionProblem: String? = nil
+    ) -> MenuStatusCopy {
+        MenuStatusCopy.resolve(
+            turnawayEnabled: true, motionProblem: motionProblem,
+            motionConnected: motionConnected,
+            motionLive: motionLive ?? motionConnected,
+            intentState: intentState, automaticMutingAllowed: allowed,
+            protectedNamesOnMic: protectedNames, activeInputNames: inputNames,
+            selectedAppOnMic: selectedAppOnMic, hasUnidentifiedInput: false)
+    }
+
+    let onCall = copy()
+    check(onCall.title == "On for this call" && onCall.detail == "Live — you’re facing the Mac.",
+          "selected Zoom on mic is On for this call, not Inactive here")
+    check(copy(intentState: .turnaway).detail == "Muted — you’re turned away.",
+          "turned away in selected Zoom says Muted")
+    let idle = copy(allowed: false, inputNames: [], selectedAppOnMic: false)
+    check(idle.title == "Inactive here"
+            && idle.detail == "Waiting for a selected app to use the microphone.",
+          "no selected app on mic is Inactive here")
+    check(copy(allowed: false, inputNames: ["Zoom", "Recorder"]).title == "Standing by",
+          "selected app blocked by another app is not Inactive here")
+    let protected = copy(allowed: false, protectedNames: ["FaceTime"])
+    check(protected.title == "Standing by" && protected.detail.contains("FaceTime"),
+          "Never mute during app on mic stands by")
+    check(copy(motionConnected: false).title == "Needs AirPods",
+          "selected app without motion asks for AirPods")
+    let noMotion = copy(inputNames: [], motionProblem: "Turn on Motion access.")
+    check(noMotion.title == "No head motion" && noMotion.detail == "Turn on Motion access.",
+          "motion problem is shown even when idle")
+    let stalled = copy(intentState: .turnaway, motionLive: false)
+    check(stalled.title == "Motion paused" && !stalled.detail.contains("Muted"),
+          "stalled motion says the mic stays open")
+}
 
 if failures == 0 {
     print("ALL PASS")

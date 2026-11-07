@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-export function DownloadCount() {
-  const [label, setLabel] = useState("—");
+/** Total release downloads from GitHub. Renders nothing until the count loads
+ * or if it is unavailable, so the page never shows a placeholder number. */
+export function DownloadCount({ prefix = "" }: { prefix?: string }) {
+  const [label, setLabel] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -24,11 +26,15 @@ export function DownloadCount() {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
         }
-        setLabel("—");
+        setLabel(null);
       });
 
     return () => controller.abort();
   }, []);
 
-  return <span aria-live="polite">{label}</span>;
+  return (
+    <span aria-live="polite">
+      {label === null ? null : `${prefix}${label} downloads`}
+    </span>
+  );
 }

@@ -212,3 +212,6 @@ skills-lock.json
 # Swift build output
 apps/mac/.build/
 apps/mac/.swiftpm/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/

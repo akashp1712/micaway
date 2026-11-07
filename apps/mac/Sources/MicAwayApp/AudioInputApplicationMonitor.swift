@@ -1,6 +1,7 @@
 import AppKit
 @preconcurrency import CoreAudio
 import Foundation
+import MicAwayCore
 
 struct AudioInputSnapshot: Equatable {
     var applications: [ScopedApplication] = []

@@ -8,9 +8,9 @@ const siteUrl = "https://micaway.akashpanchal.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "MicAway — Not every word is a prompt",
+  title: "MicAway — Turn to answer. The call mutes.",
   description:
-    "The missing mute gesture for continuous voice agents. Look away to keep side conversations out; face your Mac to continue.",
+    "Turn your head away from the Mac during a call and the mic mutes. Face the Mac and it comes back. AirPods motion, local only.",
   alternates: {
     canonical: "/",
   },

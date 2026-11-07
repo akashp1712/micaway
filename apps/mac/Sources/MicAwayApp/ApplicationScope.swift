@@ -13,10 +13,3 @@ enum ApplicationScope: String, CaseIterable, Identifiable {
         }
     }
 }
-
-struct ScopedApplication: Codable, Hashable, Identifiable {
-    let bundleIdentifier: String
-    let name: String
-
-    var id: String { bundleIdentifier }
-}

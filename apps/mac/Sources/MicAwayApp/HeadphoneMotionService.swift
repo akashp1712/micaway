@@ -207,7 +207,11 @@ final class HeadphoneMotionService: NSObject, CMHeadphoneMotionManagerDelegate {
                 self.streamGeneration == generation
             else { return }
 
-            self.recoverMotionStream(after: "AirPods connected, but no head-motion samples arrived.")
+            // Usually Motion access: macOS ties it to the exact build, so an
+            // update can silently stop samples without reporting "denied".
+            self.recoverMotionStream(
+                after: "AirPods are connected but sending no head motion. Turn on MicAway in System Settings → Privacy & Security → Motion & Fitness."
+            )
         }
     }
 
@@ -222,7 +226,7 @@ final class HeadphoneMotionService: NSObject, CMHeadphoneMotionManagerDelegate {
 
         let attempts = streamRestartAttempts
         if attempts >= 3 {
-            onStatus?(.unavailable("\(message) Retrying automatically."))
+            onStatus?(.unavailable(message))
         }
 
         let delay = attempts >= 3 ? 5_000_000_000 : UInt64(attempts) * 500_000_000

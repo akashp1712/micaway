@@ -49,6 +49,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var audioInputSnapshot = AudioInputSnapshot()
 
     private var latestYawRadians: Double?
+    private var latestYawUptime: TimeInterval?
+    private var lastPublishedMotionLive = false
+    private var muteWatchdog: Timer?
     private var engine = TurnawayEngine()
     private let motion = HeadphoneMotionService()
     private let microphone = InputMuteController()
@@ -61,28 +64,25 @@ final class AppModel: ObservableObject {
     private static let applicationScopeDefaultsKey = "applicationScope"
     private static let selectedApplicationsDefaultsKey = "selectedApplications"
     private static let protectedApplicationsDefaultsKey = "protectedApplications"
+    /// Written by earlier versions after seeding six call apps onto
+    /// Never mute during. Read only to recognise those installs.
     private static let didSeedProtectedApplicationsDefaultsKey = "didSeedProtectedApplications"
-
-    /// Real-time comms apps that ship pre-protected so meetings work out of the
-    /// box. Google Meet is deliberately absent: it runs inside a browser, so
-    /// Core Audio reports the browser's bundle ID and protecting it would also
-    /// stop a browser-based dictation app from muting. Browser-Meet users add
-    /// their browser through "Never mute during → Add …". Bundle IDs are
-    /// verified against installed apps during release testing; an ID for an
-    /// app that is not installed simply never matches and is harmless.
-    private static let defaultProtectedApplications: [ScopedApplication] = [
-        ScopedApplication(bundleIdentifier: "us.zoom.xos", name: "Zoom"),
-        ScopedApplication(bundleIdentifier: "com.microsoft.teams2", name: "Microsoft Teams"),
-        ScopedApplication(bundleIdentifier: "com.cisco.webexmeetingsapp", name: "Webex"),
-        ScopedApplication(bundleIdentifier: "com.tinyspeck.slackmacgap", name: "Slack"),
-        ScopedApplication(bundleIdentifier: "com.apple.FaceTime", name: "FaceTime"),
-        ScopedApplication(bundleIdentifier: "com.hnc.Discord", name: "Discord"),
-    ]
+    /// Set once the current seed or the legacy-seed migration has run.
+    private static let didApplyApplicationListDefaultsKey = "didApplyCallApplicationDefaults"
 
     var canCalibrate: Bool { latestYawRadians != nil }
+
+    /// AirPods are connected and head-motion samples are still arriving.
+    var motionLive: Bool {
+        MuteResolver.motionIsLive(
+            connected: motionStatus == .connected,
+            secondsSinceLastSample: latestYawUptime.map {
+                ProcessInfo.processInfo.systemUptime - $0
+            }
+        )
+    }
     var activeApplicationAllowed: Bool {
-        // A live meeting/call app wins in every scope mode: muting the shared
-        // device would flip its mic-off indicator and disturb the call.
+        // An app on Never mute during wins in every scope mode.
         guard !protectedApplicationOnMic else { return false }
         return switch applicationScope {
         case .everyApp:
@@ -130,44 +130,32 @@ final class AppModel: ObservableObject {
         activeApplication?.name ?? "the current app"
     }
 
-    var statusTitle: String {
-        if !turnawayEnabled { return "Paused" }
-        if protectedApplicationOnMic { return "Standing by" }
-        if !activeApplicationAllowed { return "Inactive here" }
-        return switch intentState {
-        case .needsCalibration: "Face your Mac"
-        case .listening: "Listening"
-        case .turnaway: "Not for your Mac"
-        }
+    var statusCopy: MenuStatusCopy {
+        let selectedIdentifiers = Set(selectedApplications.map(\.bundleIdentifier))
+        return MenuStatusCopy.resolve(
+            turnawayEnabled: turnawayEnabled,
+            motionProblem: motionProblem,
+            motionConnected: motionStatus == .connected,
+            motionLive: motionLive,
+            intentState: intentState,
+            automaticMutingAllowed: activeApplicationAllowed,
+            protectedNamesOnMic: activeProtectedApplications.map(\.name),
+            activeInputNames: audioInputSnapshot.applications.map(\.name),
+            selectedAppOnMic: applicationScope == .selectedApps
+                && audioInputSnapshot.applications.contains {
+                    selectedIdentifiers.contains($0.bundleIdentifier)
+                },
+            hasUnidentifiedInput: audioInputSnapshot.hasUnidentifiedApplication
+        )
     }
 
-    var statusDetail: String {
-        if !turnawayEnabled {
-            return "Turnaway muting is off. Your other mic controls are unchanged."
-        }
-        if protectedApplicationOnMic {
-            let names = activeProtectedApplications.map(\.name).joined(separator: ", ")
-            return "Muting paused so \(names) keeps your microphone."
-        }
-        if !activeApplicationAllowed {
-            if audioInputSnapshot.hasUnidentifiedApplication {
-                return "MicAway could not identify the voice app, so it stays safely inactive."
-            }
-            if audioInputSnapshot.applications.isEmpty {
-                return "Waiting for a selected app to use the microphone."
-            }
-            let names = audioInputSnapshot.applications.map(\.name).joined(separator: ", ")
-            return "Automatic muting is off while \(names) uses the microphone."
-        }
-        return switch intentState {
-        case .needsCalibration:
-            "Calibrate once while looking forward."
-        case .listening:
-            "Turn away to pause voice input."
-        case .turnaway:
-            "Your side conversation stays out."
-        }
+    private var motionProblem: String? {
+        if case let .unavailable(reason) = motionStatus { return reason }
+        return nil
     }
+
+    var statusTitle: String { statusCopy.title }
+    var statusDetail: String { statusCopy.detail }
 
     var menuBarStatus: MenuBarStatus {
         if !turnawayEnabled { return .paused }
@@ -186,7 +174,7 @@ final class AppModel: ObservableObject {
         yawDegrees: Double,
         turnawayEnabled: Bool = true,
         message: String,
-        applicationScope: ApplicationScope = .everyApp
+        applicationScope: ApplicationScope = .selectedApps
     ) {
         self.turnawayEnabled = turnawayEnabled
         self.turnAngleDegrees = SensitivityLimits.defaultDegrees
@@ -194,12 +182,17 @@ final class AppModel: ObservableObject {
             configuration: .forTurnAngle(enterThresholdDegrees: SensitivityLimits.defaultDegrees)
         )
         self.applicationScope = applicationScope
-        self.selectedApplications = []
-        self.protectedApplications = []
+        self.selectedApplications = ApplicationListDefaults.allowedApplications
+        self.protectedApplications = ApplicationListDefaults.protectedApplications
+        self.audioInputSnapshot = AudioInputSnapshot(
+            applications: [ApplicationListDefaults.callApplications[0]]
+        )
         self.intentState = snapshotIntent
         self.relativeYawDegrees = yawDegrees
         self.message = message
         self.latestYawRadians = 0
+        // Snapshots render over a few seconds; keep motion reading as live.
+        self.latestYawUptime = .infinity
         self.motionStatus = .connected
     }
 
@@ -216,22 +209,24 @@ final class AppModel: ObservableObject {
             configuration: .forTurnAngle(enterThresholdDegrees: storedAngle)
         )
 
-        applicationScope = UserDefaults.standard.string(
-            forKey: Self.applicationScopeDefaultsKey
-        ).flatMap(ApplicationScope.init(rawValue:)) ?? .everyApp
-        selectedApplications = Self.loadSelectedApplications()
-        protectedApplications = Self.loadProtectedApplications()
+        let launchState = Self.loadApplicationLists()
+        applicationScope = launchState.scope
+        selectedApplications = launchState.lists.allowed
+        protectedApplications = launchState.lists.protected
 
         motion.onStatus = { [weak self] status in
-            self?.motionStatus = status
+            guard let self else { return }
+            motionStatus = status
             switch status {
             case .looking:
-                self?.message = "Put in your AirPods to begin."
+                message = "Put in your AirPods to begin."
             case .connected:
-                self?.message = "Motion connected. Face your Mac and calibrate."
+                message = "Motion connected. Face your Mac and calibrate."
             case let .unavailable(reason):
-                self?.message = reason
+                message = reason
             }
+            // Losing motion must release a turnaway mute right away.
+            applyMuteState()
         }
         motion.onYaw = { [weak self] yaw, isNewReferenceFrame in
             self?.ingest(yaw: yaw, isNewReferenceFrame: isNewReferenceFrame)
@@ -244,6 +239,10 @@ final class AppModel: ObservableObject {
         observeActiveApplication()
         audioInputMonitor.start()
         motion.start()
+        startMuteWatchdog()
+        // Restores inputs a previous run muted but never got to unmute
+        // (crash, forced quit, or a device that was absent at the time).
+        applyMuteState()
     }
 
     func calibrate() {
@@ -309,7 +308,12 @@ final class AppModel: ObservableObject {
     }
 
     private func ingest(yaw: Double, isNewReferenceFrame: Bool) {
+        let wasLive = motionLive
         latestYawRadians = yaw
+        latestYawUptime = ProcessInfo.processInfo.systemUptime
+        if motionLive != lastPublishedMotionLive {
+            lastPublishedMotionLive = motionLive
+        }
         objectWillChange.send()
         guard engine.state != .needsCalibration else { return }
 
@@ -325,10 +329,16 @@ final class AppModel: ObservableObject {
             // valid listening baseline).
             apply(engine.reanchor(yawRadians: yaw))
             message = "Head reference re-centered after an AirPods reconnect."
-            return
+        } else {
+            apply(engine.update(yawRadians: yaw, timestamp: ProcessInfo.processInfo.systemUptime))
         }
 
-        apply(engine.update(yawRadians: yaw, timestamp: ProcessInfo.processInfo.systemUptime))
+        // apply() mutes only when the intent state changes. Samples can resume
+        // while the wearer is still turned away; without this the menu would
+        // say "Muted" and the mic would stay open until the next turn.
+        if !wasLive && motionLive {
+            applyMuteState()
+        }
     }
 
     private func apply(_ reading: IntentReading) {
@@ -369,12 +379,19 @@ final class AppModel: ObservableObject {
         applyMuteState()
     }
 
-    private func applyMuteState() {
-        let shouldMute = MuteResolver.shouldMute(
+    private var shouldMuteNow: Bool {
+        MuteResolver.shouldMute(
             turnawayEnabled: turnawayEnabled,
+            microphoneInUse: !audioInputSnapshot.applications.isEmpty
+                || audioInputSnapshot.hasUnidentifiedApplication,
             applicationAllowed: activeApplicationAllowed,
+            motionLive: motionLive,
             intentState: intentState
         )
+    }
+
+    private func applyMuteState() {
+        let shouldMute = shouldMuteNow
         do {
             if shouldMute {
                 try microphone.muteForTurnaway()
@@ -386,7 +403,35 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// Motion samples can simply stop (no disconnect callback) when a call
+    /// switches the AirPods' Bluetooth profile, and a muted input can vanish
+    /// and come back under a new ID. Neither produces an event, so poll: while
+    /// MicAway holds a mute it no longer should, keep releasing it.
+    private func startMuteWatchdog() {
+        let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.checkMuteWatchdog() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        muteWatchdog = timer
+    }
+
+    private func checkMuteWatchdog() {
+        let live = motionLive
+        if live != lastPublishedMotionLive {
+            lastPublishedMotionLive = live
+            objectWillChange.send()
+        }
+        // Release a mute that is no longer justified, and re-assert one that
+        // should still be held. Re-assert covers an input that AirPods re-add
+        // under a new ID without its mute, which produces no other event.
+        if shouldMuteNow || microphone.holdsMutes {
+            applyMuteState()
+        }
+    }
+
     func prepareForTermination() {
+        muteWatchdog?.invalidate()
+        muteWatchdog = nil
         audioInputMonitor.stop()
         motion.stop()
         try? microphone.restoreIfNeeded()
@@ -437,49 +482,62 @@ final class AppModel: ObservableObject {
     }
 
     private func persistSelectedApplications() {
-        guard let data = try? JSONEncoder().encode(selectedApplications) else { return }
-        UserDefaults.standard.set(data, forKey: Self.selectedApplicationsDefaultsKey)
-    }
-
-    private static func loadSelectedApplications() -> [ScopedApplication] {
-        guard let data = UserDefaults.standard.data(forKey: selectedApplicationsDefaultsKey),
-              let applications = try? JSONDecoder().decode([ScopedApplication].self, from: data)
-        else { return [] }
-        return applications
+        Self.persist(selectedApplications, forKey: Self.selectedApplicationsDefaultsKey)
     }
 
     private func persistProtectedApplications() {
-        guard let data = try? JSONEncoder().encode(protectedApplications) else { return }
-        UserDefaults.standard.set(data, forKey: Self.protectedApplicationsDefaultsKey)
+        Self.persist(protectedApplications, forKey: Self.protectedApplicationsDefaultsKey)
     }
 
-    /// Loads the protected apps, merging in the curated comms defaults exactly
-    /// once (first launch). The one-time seed flag means apps the user removes
-    /// stay removed rather than reappearing on the next launch.
-    private static func loadProtectedApplications() -> [ScopedApplication] {
-        var stored: [ScopedApplication] = []
-        if let data = UserDefaults.standard.data(forKey: protectedApplicationsDefaultsKey),
-           let decoded = try? JSONDecoder().decode([ScopedApplication].self, from: data) {
-            stored = decoded
-        }
+    private static func persist(_ applications: [ScopedApplication], forKey key: String) {
+        guard let data = try? JSONEncoder().encode(applications) else { return }
+        UserDefaults.standard.set(data, forKey: key)
+    }
 
-        guard !UserDefaults.standard.bool(forKey: didSeedProtectedApplicationsDefaultsKey) else {
-            return stored
-        }
+    private static func loadApplications(forKey key: String) -> [ScopedApplication]? {
+        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode([ScopedApplication].self, from: data)
+    }
 
-        var merged = stored
-        let existingIdentifiers = Set(stored.map(\.bundleIdentifier))
-        for application in defaultProtectedApplications
-        where !existingIdentifiers.contains(application.bundleIdentifier) {
-            merged.append(application)
-        }
-        merged.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    /// Resolves Allowed apps, Never mute during, and Use in for this launch,
+    /// applying the first-launch seed or the one-time legacy migration (see
+    /// `ApplicationListDefaults.resolve`) and persisting the result.
+    ///
+    /// Fresh installs default Use in to Selected apps. Existing installs that
+    /// never chose a scope ran as Every app, so that is pinned rather than
+    /// silently switching them to Selected apps.
+    private static func loadApplicationLists() -> (
+        lists: ApplicationListDefaults.Lists,
+        scope: ApplicationScope
+    ) {
+        let defaults = UserDefaults.standard
+        let storedAllowed = loadApplications(forKey: selectedApplicationsDefaultsKey)
+        let storedProtected = loadApplications(forKey: protectedApplicationsDefaultsKey)
+        let didSeedLegacyDefaults = defaults.bool(forKey: didSeedProtectedApplicationsDefaultsKey)
+        let didApplyCurrentDefaults = defaults.bool(forKey: didApplyApplicationListDefaultsKey)
 
-        UserDefaults.standard.set(true, forKey: didSeedProtectedApplicationsDefaultsKey)
-        if let data = try? JSONEncoder().encode(merged) {
-            UserDefaults.standard.set(data, forKey: protectedApplicationsDefaultsKey)
+        let lists = ApplicationListDefaults.resolve(
+            storedAllowed: storedAllowed,
+            storedProtected: storedProtected,
+            didSeedLegacyDefaults: didSeedLegacyDefaults,
+            didApplyCurrentDefaults: didApplyCurrentDefaults
+        )
+
+        var scope = defaults.string(forKey: applicationScopeDefaultsKey)
+            .flatMap(ApplicationScope.init(rawValue:))
+        if !didApplyCurrentDefaults {
+            persist(lists.allowed, forKey: selectedApplicationsDefaultsKey)
+            persist(lists.protected, forKey: protectedApplicationsDefaultsKey)
+            defaults.set(true, forKey: didApplyApplicationListDefaultsKey)
+            if scope == nil {
+                let isExistingInstall = storedAllowed != nil
+                    || storedProtected != nil
+                    || didSeedLegacyDefaults
+                scope = isExistingInstall ? .everyApp : .selectedApps
+                defaults.set(scope?.rawValue, forKey: applicationScopeDefaultsKey)
+            }
         }
-        return merged
+        return (lists, scope ?? .selectedApps)
     }
 
     private var selectedModeAllowsAutomaticMuting: Bool {

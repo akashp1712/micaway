@@ -1,10 +1,12 @@
 @preconcurrency import CoreAudio
 import Foundation
+import MicAwayCore
 
 final class InputMuteController: @unchecked Sendable {
     enum GateError: LocalizedError {
         case noInputDevices
         case coreAudio(OSStatus)
+        case stillMuted
 
         var errorDescription: String? {
             switch self {
@@ -12,11 +14,40 @@ final class InputMuteController: @unchecked Sendable {
                 return "No microphone with a system mute switch is available."
             case let .coreAudio(status):
                 return "Core Audio returned error \(status)."
+            case .stillMuted:
+                return "macOS kept the microphone muted. MicAway will keep trying to unmute it."
             }
         }
     }
 
-    private var devicesMutedByUs = Set<AudioObjectID>()
+    private struct InputDevice {
+        let id: AudioObjectID
+        let uid: String
+    }
+
+    private static let ledgerDefaultsKey = "mutedInputDeviceUIDs"
+
+    /// Inputs MicAway muted, by device UID. Persisted so a relaunch after a
+    /// crash or forced quit still restores them.
+    private var ledger: MutedInputLedger {
+        didSet {
+            guard ledger != oldValue else { return }
+            UserDefaults.standard.set(
+                ledger.deviceUIDs.sorted(),
+                forKey: Self.ledgerDefaultsKey
+            )
+        }
+    }
+
+    init() {
+        ledger = MutedInputLedger(deviceUIDs: Set(
+            UserDefaults.standard.stringArray(forKey: Self.ledgerDefaultsKey) ?? []
+        ))
+    }
+
+    /// True while any input MicAway muted has not been confirmed unmuted,
+    /// including one that is temporarily absent.
+    var holdsMutes: Bool { !ledger.isEmpty }
 
     func muteForTurnaway() throws {
         let devices = try muteCapableInputDevices()
@@ -24,32 +55,52 @@ final class InputMuteController: @unchecked Sendable {
         let address = muteAddress()
         var firstError: Error?
 
-        for device in devices where !devicesMutedByUs.contains(device) {
+        for device in devices {
             do {
-                guard try !readMute(device: device, address: address) else { continue }
-                try writeMute(true, device: device, address: address)
-                devicesMutedByUs.insert(device)
+                let alreadyMuted = try readMute(device: device.id, address: address)
+                if ledger.contains(device.uid) {
+                    // Ours. Re-assert if a recreated device came back unmuted.
+                    if !alreadyMuted {
+                        try writeMute(true, device: device.id, address: address)
+                    }
+                    continue
+                }
+                // Muted by someone else: not ours to change or to restore.
+                guard !alreadyMuted else { continue }
+                try writeMute(true, device: device.id, address: address)
+                ledger.recordMuted(device.uid)
             } catch {
                 firstError = firstError ?? error
             }
         }
 
-        if devicesMutedByUs.isEmpty, let firstError {
+        if ledger.isEmpty, let firstError {
             throw firstError
         }
     }
 
+    /// Unmutes every present input MicAway muted, confirming each by reading
+    /// it back. Inputs that are absent (for example AirPods mid profile
+    /// switch) or that macOS kept muted stay in the ledger for the next call.
     func restoreIfNeeded() throws {
-        guard !devicesMutedByUs.isEmpty else { return }
+        guard !ledger.isEmpty else { return }
         let address = muteAddress()
+        var idsByUID: [String: AudioObjectID] = [:]
+        for device in try muteCapableInputDevices() {
+            idsByUID[device.uid] = idsByUID[device.uid] ?? device.id
+        }
         var firstError: Error?
 
-        for device in Array(devicesMutedByUs) {
+        for uid in ledger.restorable(presentDeviceUIDs: Set(idsByUID.keys)) {
+            guard let id = idsByUID[uid] else { continue }
             do {
-                if isPropertySettable(device, address: address) {
-                    try writeMute(false, device: device, address: address)
+                if try readMute(device: id, address: address) {
+                    try writeMute(false, device: id, address: address)
                 }
-                devicesMutedByUs.remove(device)
+                guard try !readMute(device: id, address: address) else {
+                    throw GateError.stillMuted
+                }
+                ledger.recordRestored(uid)
             } catch {
                 firstError = firstError ?? error
             }
@@ -58,7 +109,7 @@ final class InputMuteController: @unchecked Sendable {
         if let firstError { throw firstError }
     }
 
-    private func muteCapableInputDevices() throws -> [AudioObjectID] {
+    private func muteCapableInputDevices() throws -> [InputDevice] {
         var devicesAddress = AudioObjectPropertyAddress(
             mSelector: kAudioHardwarePropertyDevices,
             mScope: kAudioObjectPropertyScopeGlobal,
@@ -87,7 +138,24 @@ final class InputMuteController: @unchecked Sendable {
         guard dataStatus == noErr else { throw GateError.coreAudio(dataStatus) }
 
         let address = muteAddress()
-        return devices.filter { isPropertySettable($0, address: address) }
+        return devices.compactMap { id in
+            guard isPropertySettable(id, address: address),
+                  let uid = deviceUID(id) else { return nil }
+            return InputDevice(id: id, uid: uid)
+        }
+    }
+
+    private func deviceUID(_ device: AudioObjectID) -> String? {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyDeviceUID,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var uid: Unmanaged<CFString>?
+        var size = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+        let status = AudioObjectGetPropertyData(device, &address, 0, nil, &size, &uid)
+        guard status == noErr, let uid else { return nil }
+        return uid.takeRetainedValue() as String
     }
 
     private func muteAddress() -> AudioObjectPropertyAddress {

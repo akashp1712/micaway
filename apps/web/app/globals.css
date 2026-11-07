@@ -151,6 +151,13 @@ button {
   text-wrap: pretty;
 }
 
+.hero-meta {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -866,6 +873,17 @@ button {
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.03em;
+}
+
+.app-list {
+  padding: 0;
+  list-style: none;
+}
+
+.secondary-use {
+  margin-top: 28px;
+  font-size: 15px;
+  color: var(--muted);
 }
 
 .trademark-note {

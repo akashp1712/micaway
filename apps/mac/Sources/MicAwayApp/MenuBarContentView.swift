@@ -158,6 +158,8 @@ struct MenuBarContentView: View {
                             .fixedSize()
                         }
                         .frame(minHeight: 24)
+
+                        helperText("Using another browser for calls? Bring it forward and add it.")
                     }
 
                     HStack(spacing: 8) {
@@ -188,11 +190,7 @@ struct MenuBarContentView: View {
                     }
                     .frame(minHeight: 24)
 
-                    Text("In a meeting in your browser? Bring it forward and add it here.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    helperText("Calls you want left alone.")
 
                     sensitivitySlider
 
@@ -223,6 +221,14 @@ struct MenuBarContentView: View {
         .padding(18)
         .frame(width: 300)
         .font(.system(size: 13))
+    }
+
+    private func helperText(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Continuous sensitivity control. The stored value is the "mute past this

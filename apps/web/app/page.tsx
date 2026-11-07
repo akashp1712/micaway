@@ -7,45 +7,32 @@ import { InstallGuide } from "@/components/install-guide";
 const githubUrl = "https://github.com/akashp1712/micaway";
 const downloadUrl = "/api/download";
 
-const voiceApps = [
-  {
-    name: "ChatGPT Voice",
-    logo: "/brands/chatgpt.webp",
-    className: "chatgpt-logo",
-    href: "https://help.openai.com/en/articles/20001274/?utm_source=micaway&utm_medium=referral&utm_campaign=compatible_voice_apps",
-  },
-  {
-    name: "Wispr Flow",
-    logo: "/brands/wispr-flow.png",
-    className: "wispr-logo",
-    href: "https://wisprflow.ai/?utm_source=micaway&utm_medium=referral&utm_campaign=compatible_voice_apps",
-  },
-  {
-    name: "FluidVoice",
-    logo: "/brands/fluidvoice-icon.png",
-    className: "fluidvoice-logo",
-    href: "https://fluidvoice.org/?utm_source=micaway&utm_medium=referral&utm_campaign=compatible_voice_apps",
-  },
+const callApps = [
+  "Zoom",
+  "Microsoft Teams",
+  "Slack",
+  "FaceTime",
+  "Google Meet in the browser",
 ] as const;
 
 const menuShots = [
   {
     src: "/images/menu/calibrate.png",
-    title: "Calibrate",
-    copy: "Wear your AirPods, face your Mac, and set forward once.",
+    title: "Set forward",
+    copy: "Wear AirPods, face the Mac, and set forward once.",
     alt: "MicAway menu asking you to face your Mac and calibrate",
   },
   {
     src: "/images/menu/listening.png",
-    title: "Talk",
-    copy: "Face forward. MicAway leaves your input available.",
-    alt: "MicAway menu showing Listening while facing the Mac",
+    title: "Join the call",
+    copy: "Zoom, Teams, Slack, FaceTime, or Meet. MicAway turns on by itself.",
+    alt: "MicAway menu showing On for this call, live while facing the Mac",
   },
   {
     src: "/images/menu/away.png",
     title: "Turn",
-    copy: "Look toward someone beside you. The aside stays out.",
-    alt: "MicAway menu showing Not for your Mac after turning away",
+    copy: "Turn toward someone and you’re muted. Face the screen and you’re live.",
+    alt: "MicAway menu showing On for this call, muted after turning away",
   },
 ] as const;
 
@@ -77,26 +64,15 @@ export default function HomePage() {
           width={132}
         />
         <p className="hero-name">MicAway</p>
-        {/*
-          DRAFT — DO NOT DEPLOY until Meeting Mode is validated + built.
-          Spike open question: does device-unmute reliably restore audio in
-          Google Meet? Today the app STANDS DOWN during meetings (protected
-          apps), so this meetings-first hero describes intended behaviour, not
-          shipped behaviour. Previous copy kept below for a clean revert.
-          OLD H1:   Not every word is a prompt.
-          OLD COPY: Face your Mac to speak. Look away, and MicAway mutes the
-                    microphone on your machine — without ever hearing you.
-        */}
-        <h1 id="hero-title">Turn away. You&rsquo;re muted.</h1>
+        <h1 id="hero-title">Turn to answer. The call mutes.</h1>
         <p className="hero-copy">
-          Someone leans in mid-call — turn to answer and MicAway mutes you, then
-          brings your mic back when you face your Mac again. No push-to-talk, no
-          scramble for the mute button. Same for dictation: your aside never
-          becomes a prompt. It never hears a word.
+          Face your Mac and the mic comes back. An aside to someone beside you
+          never hits the meeting. AirPods motion, on this Mac. No account. No
+          network. It never hears a word.
         </p>
         <div className="hero-actions">
           <a className="button button-signal" href={downloadUrl}>
-            <Download aria-hidden="true" /> Download for Mac
+            <Download aria-hidden="true" /> Get MicAway
           </a>
           <a
             className="text-link"
@@ -104,9 +80,13 @@ export default function HomePage() {
             rel="noreferrer"
             target="_blank"
           >
-            View on GitHub
+            <Github aria-hidden="true" /> Read the source
           </a>
         </div>
+        <p className="hero-meta">
+          Free and open source
+          <DownloadCount prefix=" · " />
+        </p>
         <AttentionDemo />
       </section>
 
@@ -128,32 +108,20 @@ export default function HomePage() {
       </section>
 
       <section aria-labelledby="workflow-title" className="workflow-shift">
-        <h2 id="workflow-title">Works where voice stays open.</h2>
-        <div className="app-list">
-          {voiceApps.map((app) => (
-            <a
-              className="app-chip"
-              href={app.href}
-              key={app.name}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <span className={`app-logo ${app.className}`}>
-                <Image
-                  alt=""
-                  height={40}
-                  src={app.logo}
-                  unoptimized
-                  width={40}
-                />
-              </span>
-              <h3>{app.name}</h3>
-            </a>
+        <h2 id="workflow-title">Works in the calls you already use.</h2>
+        <ul className="app-list">
+          {callApps.map((app) => (
+            <li className="app-chip" key={app}>
+              <h3>{app}</h3>
+            </li>
           ))}
-        </div>
+        </ul>
+        <p className="secondary-use">
+          Also keeps an aside out of Wispr Flow, FluidVoice, or ChatGPT Voice.
+        </p>
         <p className="trademark-note">
-          Independent project. Not affiliated with Wispr Flow, FluidVoice, or
-          OpenAI.
+          Independent project. Not affiliated with Zoom, Microsoft, Slack,
+          Apple, Google, Wispr Flow, FluidVoice, or OpenAI.
         </p>
       </section>
 
@@ -164,17 +132,18 @@ export default function HomePage() {
         </p>
         <div className="control-grid">
           <article className="control-card">
-            <span className="control-kicker">Selected Apps</span>
-            <h3>Use it for dictation, not meetings.</h3>
+            <span className="control-kicker">How it mutes</span>
+            <h3>The room goes quiet.</h3>
             <p>
-              Choose the voice apps where turnaway muting belongs. If an
-              unselected meeting app is using your microphone, MicAway stays
-              inactive.
+              MicAway mutes your Mac&rsquo;s microphone input. It does not press
+              the call app&rsquo;s mute button, so the mic icon in Zoom, Teams,
+              Slack, or Meet may still look open while nobody hears you. Face
+              the Mac and MicAway restores only the input it muted.
             </p>
             <div className="menu-shot menu-shot-embed">
               <Image
-                alt="MicAway Advanced settings with Use in and Sensitivity"
-                height={397}
+                alt="MicAway Advanced settings with Allowed apps, Never mute during, and Sensitivity"
+                height={509}
                 src="/images/menu/advanced.png"
                 width={356}
               />
@@ -231,8 +200,7 @@ export default function HomePage() {
         <h2 id="install-title">Open the preview.</h2>
         <p className="install-note">
           MicAway is open source, but this preview is not yet signed or
-          notarized. macOS may ask you to confirm the first launch. ·{" "}
-          <DownloadCount /> downloads
+          notarized. macOS may ask you to confirm the first launch.
         </p>
         <InstallGuide />
         <a className="button button-signal" href={downloadUrl}>
