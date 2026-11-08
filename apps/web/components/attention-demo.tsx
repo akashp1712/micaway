@@ -8,69 +8,15 @@ const AWAY = "/images/turn/04.jpg";
 const MAX_YAW = 42;
 
 function easeInOut(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+  return (1 - Math.cos(Math.PI * t)) / 2;
 }
 
 function clamp(value: number) {
   return Math.min(1, Math.max(0, value));
 }
 
-type TurnPhase = "hold-face" | "turn-away" | "hold-away" | "turn-face";
-
-function playTurnLoop(
-  getProgress: () => number,
-  setProgressValue: (value: number) => void,
-  isActive: () => boolean
-) {
-  const holdMs = 1800;
-  const turnMs = 2200;
-  let raf = 0;
-  let phase: TurnPhase = "hold-face";
-  let phaseStart = performance.now();
-  let from = 0;
-
-  const tick = (now: number) => {
-    if (!isActive()) {
-      return;
-    }
-
-    const elapsed = now - phaseStart;
-
-    if (phase === "hold-face" && elapsed >= holdMs) {
-      phase = "turn-away";
-      phaseStart = now;
-      from = getProgress();
-    } else if (phase === "turn-away") {
-      const t = Math.min(1, elapsed / turnMs);
-      setProgressValue(from + (1 - from) * easeInOut(t));
-      if (t >= 1) {
-        phase = "hold-away";
-        phaseStart = now;
-      }
-    } else if (phase === "hold-away" && elapsed >= holdMs) {
-      phase = "turn-face";
-      phaseStart = now;
-      from = getProgress();
-    } else if (phase === "turn-face") {
-      const t = Math.min(1, elapsed / turnMs);
-      setProgressValue(from * (1 - easeInOut(t)));
-      if (t >= 1) {
-        phase = "hold-face";
-        phaseStart = now;
-      }
-    }
-
-    raf = requestAnimationFrame(tick);
-  };
-
-  raf = requestAnimationFrame(tick);
-  return () => cancelAnimationFrame(raf);
-}
-
 export function AttentionDemo() {
   const [progress, setProgress] = useState(0);
-  const autoPlayRef = useRef(true);
-  const [autoPlay, setAutoPlay] = useState(true);
   const progressRef = useRef(0);
   const sceneRef = useRef<HTMLDivElement>(null);
   const animateRef = useRef(0);
@@ -86,15 +32,18 @@ export function AttentionDemo() {
     setProgress(next);
   };
 
-  const stopAuto = () => {
-    autoPlayRef.current = false;
-    setAutoPlay(false);
+  const stopAnimation = () => {
     cancelAnimationFrame(animateRef.current);
   };
 
-  const animateTo = (target: number, duration = 2000) => {
-    stopAuto();
+  const animateTo = (target: number) => {
+    stopAnimation();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      updateProgress(target);
+      return;
+    }
     const start = progressRef.current;
+    const duration = Math.max(180, 680 * Math.abs(target - start));
     const started = performance.now();
 
     const tick = (now: number) => {
@@ -109,38 +58,11 @@ export function AttentionDemo() {
   };
 
   useEffect(() => {
-    for (const src of [FACING, AWAY]) {
-      const image = new window.Image();
-      image.src = src;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (
-      !autoPlay ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-
-    return playTurnLoop(
-      () => progressRef.current,
-      (value) => {
-        const next = clamp(value);
-        progressRef.current = next;
-        setProgress(next);
-      },
-      () => autoPlayRef.current
-    );
-  }, [autoPlay]);
-
-  useEffect(() => {
     return () => cancelAnimationFrame(animateRef.current);
   }, []);
 
   const listening = progress < 0.46;
   const yaw = Math.round(progress * MAX_YAW);
-  const blur = Math.sin(progress * Math.PI) * 1.4;
 
   return (
     <section
@@ -148,26 +70,42 @@ export function AttentionDemo() {
       className={`attention-demo ${listening ? "is-listening" : "is-aside"}`}
     >
       <div
+        aria-describedby="demo-hint"
         aria-label="Turn the head"
         aria-valuemax={MAX_YAW}
         aria-valuemin={0}
         aria-valuenow={yaw}
         aria-valuetext={
-          listening ? "Facing the Mac" : `Looked away, ${yaw} degrees`
+          listening
+            ? "Facing the Mac, microphone live"
+            : `Looked away, microphone muted, ${yaw} degrees`
         }
         className="scene"
         onKeyDown={(event) => {
-          if (event.key === "ArrowRight" || event.key === " ") {
+          if (event.key === " ") {
+            event.preventDefault();
+            animateTo(progressRef.current < 0.46 ? 1 : 0);
+          }
+          if (event.key === "ArrowRight" || event.key === "End") {
             event.preventDefault();
             animateTo(1);
           }
-          if (event.key === "ArrowLeft") {
+          if (event.key === "ArrowLeft" || event.key === "Home") {
             event.preventDefault();
             animateTo(0);
           }
         }}
+        onLostPointerCapture={() => {
+          dragRef.current = null;
+        }}
+        onPointerCancel={() => {
+          dragRef.current = null;
+        }}
         onPointerDown={(event) => {
-          stopAuto();
+          if (!event.isPrimary || event.button !== 0) {
+            return;
+          }
+          stopAnimation();
           event.currentTarget.setPointerCapture(event.pointerId);
           dragRef.current = {
             startX: event.clientX,
@@ -192,48 +130,35 @@ export function AttentionDemo() {
           const drag = dragRef.current;
           dragRef.current = null;
           if (drag && !drag.moved) {
-            animateTo(progressRef.current < 0.5 ? 1 : 0);
+            animateTo(progressRef.current < 0.46 ? 1 : 0);
+          } else if (drag) {
+            animateTo(progressRef.current < 0.46 ? 0 : 1);
           }
         }}
         ref={sceneRef}
         role="slider"
         tabIndex={0}
       >
-        <div
-          className="scene-photo"
-          style={{
-            opacity: 1 - progress,
-            filter: `blur(${blur}px)`,
-            transform: `scale(${1 + progress * 0.035}) translateX(${progress * -10}px)`,
-            zIndex: progress < 1 ? 1 : 0,
-          }}
-        >
+        {/* Keep an opaque base so the dissolve never exposes the scene background. */}
+        <div className="scene-photo">
           <Image
             alt="A developer facing a Mac while wearing AirPods"
             fill
             priority
-            sizes="(max-width: 920px) calc(100vw - 48px), 860px"
+            sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 848px) calc(100vw - 48px), 800px"
             src={FACING}
           />
         </div>
-        <div
-          className="scene-photo"
-          style={{
-            opacity: progress,
-            filter: `blur(${blur}px)`,
-            transform: `scale(${1.035 - progress * 0.035}) translateX(${(1 - progress) * 10}px)`,
-            zIndex: progress > 0 ? 1 : 0,
-          }}
-        >
+        <div className="scene-photo" style={{ opacity: progress }}>
           <Image
             alt="The same developer turning away from the Mac to speak"
             fill
             priority
-            sizes="(max-width: 920px) calc(100vw - 48px), 860px"
+            sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 848px) calc(100vw - 48px), 800px"
             src={AWAY}
           />
         </div>
-        <div className="scene-menu" aria-hidden="true">
+        <div aria-hidden="true" className="scene-menu">
           <Image
             alt=""
             className={listening ? "is-shown" : undefined}
@@ -251,15 +176,21 @@ export function AttentionDemo() {
         </div>
       </div>
 
-      <p className="attention-status">
-        <strong>{listening ? "Facing the Mac" : "Looked away"}</strong>
+      <p aria-atomic="true" aria-live="polite" className="attention-status">
+        <strong>
+          <i aria-hidden="true" />
+          {listening ? "Facing the Mac — mic live" : "Looking away — mic muted"}
+        </strong>
         <span>
           {listening
-            ? "You’re live on the call. Drag or click the photo to turn."
-            : "Someone beside you asked a question."}
+            ? "Your call can hear you."
+            : "Your aside stays out of the call."}
         </span>
       </p>
 
+      <p className="demo-hint" id="demo-hint">
+        Drag the photo or choose a position. Arrow keys work too.
+      </p>
       <div className="attention-toggle">
         <button
           aria-pressed={listening}

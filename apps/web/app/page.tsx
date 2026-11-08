@@ -8,11 +8,11 @@ const githubUrl = "https://github.com/akashp1712/micaway";
 const downloadUrl = "/api/download";
 
 const callApps = [
-  "Zoom",
-  "Microsoft Teams",
-  "Slack",
-  "FaceTime",
-  "Google Meet in the browser",
+  { name: "Zoom", logo: "zoom.svg" },
+  { name: "Microsoft Teams", logo: "teams.svg" },
+  { name: "Slack", logo: "slack.svg" },
+  { name: "FaceTime", logo: "facetime.png" },
+  { name: "Google Meet in the browser", logo: "google-meet.svg" },
 ] as const;
 
 const menuShots = [
@@ -39,6 +39,9 @@ const menuShots = [
 export default function HomePage() {
   return (
     <main className="site-shell">
+      <a className="skip-link" href="#top">
+        Skip to content
+      </a>
       <nav aria-label="Main navigation" className="site-nav">
         <a aria-label="MicAway home" className="wordmark" href="#top">
           <Image alt="" height={22} src="/brand/micaway-mark.svg" width={22} />
@@ -54,7 +57,12 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <section aria-labelledby="hero-title" className="hero" id="top">
+      <section
+        aria-labelledby="hero-title"
+        className="hero"
+        id="top"
+        tabIndex={-1}
+      >
         <Image
           alt=""
           className="hero-icon"
@@ -66,9 +74,8 @@ export default function HomePage() {
         <p className="hero-name">MicAway</p>
         <h1 id="hero-title">Turn to answer. The call mutes.</h1>
         <p className="hero-copy">
-          Face your Mac and the mic comes back. An aside to someone beside you
-          never hits the meeting. AirPods motion, on this Mac. No account. No
-          network. It never hears a word.
+          MicAway uses AirPods head tracking to mute your Mac when you look
+          away. Face the screen and your microphone comes back.
         </p>
         <div className="hero-actions">
           <a className="button button-signal" href={downloadUrl}>
@@ -87,41 +94,56 @@ export default function HomePage() {
           Free and open source
           <DownloadCount prefix=" · " />
         </p>
+        <p className="hero-requirements">
+          macOS 14+ · AirPods with head tracking
+        </p>
         <AttentionDemo />
       </section>
 
       <section aria-labelledby="how-title" className="how-section">
         <h2 id="how-title">Set it once. Then turn.</h2>
-        <div className="setup-gallery">
-          {menuShots.map((shot) => (
-            <article className="setup-step" key={shot.title}>
+        <ol className="setup-gallery">
+          {menuShots.map((shot, index) => (
+            <li className="setup-step" key={shot.title}>
               <div className="menu-shot">
                 <Image alt={shot.alt} height={321} src={shot.src} width={356} />
               </div>
               <div className="setup-caption">
-                <h3>{shot.title}</h3>
+                <h3>
+                  <span className="step-number">{index + 1}</span>
+                  {shot.title}
+                </h3>
                 <p>{shot.copy}</p>
               </div>
-            </article>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
 
       <section aria-labelledby="workflow-title" className="workflow-shift">
         <h2 id="workflow-title">Works in the calls you already use.</h2>
         <ul className="app-list">
           {callApps.map((app) => (
-            <li className="app-chip" key={app}>
-              <h3>{app}</h3>
+            <li className="app-chip" key={app.name}>
+              <Image
+                alt=""
+                className="call-app-logo"
+                height={28}
+                src={`/brands/calls/${app.logo}`}
+                width={28}
+              />
+              <span>{app.name}</span>
             </li>
           ))}
         </ul>
         <p className="secondary-use">
-          Also keeps an aside out of Wispr Flow, FluidVoice, or ChatGPT Voice.
+          Use dictation apps? Add them in Allowed apps. FluidVoice is manually
+          verified; Wispr Flow and ChatGPT Voice still need community testing.
         </p>
         <p className="trademark-note">
           Independent project. Not affiliated with Zoom, Microsoft, Slack,
-          Apple, Google, Wispr Flow, FluidVoice, or OpenAI.
+          Apple, Google, Wispr Flow, FluidVoice, or OpenAI. Product names and
+          logos are trademarks of their owners.
         </p>
       </section>
 
@@ -132,14 +154,16 @@ export default function HomePage() {
         </p>
         <div className="control-grid">
           <article className="control-card">
-            <span className="control-kicker">How it mutes</span>
-            <h3>The room goes quiet.</h3>
-            <p>
-              MicAway mutes your Mac&rsquo;s microphone input. It does not press
-              the call app&rsquo;s mute button, so the mic icon in Zoom, Teams,
-              Slack, or Meet may still look open while nobody hears you. Face
-              the Mac and MicAway restores only the input it muted.
-            </p>
+            <div className="control-copy">
+              <span className="control-kicker">How it mutes</span>
+              <h3>The room goes quiet.</h3>
+              <p>
+                MicAway mutes your Mac&rsquo;s microphone input. It does not
+                press the call app&rsquo;s mute button, so the mic icon in Zoom,
+                Teams, Slack, or Meet may still look open while nobody hears
+                you. Face the Mac and MicAway restores only the input it muted.
+              </p>
+            </div>
             <div className="menu-shot menu-shot-embed">
               <Image
                 alt="MicAway Advanced settings with Allowed apps, Never mute during, and Sensitivity"
@@ -150,12 +174,15 @@ export default function HomePage() {
             </div>
           </article>
           <article className="control-card">
-            <span className="control-kicker">Pause Anywhere</span>
-            <h3>Move the laptop without fighting it.</h3>
-            <p>
-              Switch turnaway muting off while walking around the office. Turn
-              it back on and MicAway safely re-centers to your current position.
-            </p>
+            <div className="control-copy">
+              <span className="control-kicker">Pause Anywhere</span>
+              <h3>Move the laptop without fighting it.</h3>
+              <p>
+                Switch turnaway muting off while walking around the office. Turn
+                it back on and MicAway safely re-centers to your current
+                position.
+              </p>
+            </div>
             <div className="menu-shot menu-shot-embed">
               <Image
                 alt="MicAway menu paused with turnaway muting off"
@@ -172,7 +199,7 @@ export default function HomePage() {
         <h2 id="trust-title">It never hears you.</h2>
         <p className="trust-copy">
           MicAway reads AirPods head direction and changes microphone state
-          locally.
+          locally. No microphone permission or audio recording.
         </p>
         <ul className="trust-points">
           <li>No transcription.</li>
@@ -199,8 +226,8 @@ export default function HomePage() {
         />
         <h2 id="install-title">Open the preview.</h2>
         <p className="install-note">
-          MicAway is open source, but this preview is not yet signed or
-          notarized. macOS may ask you to confirm the first launch.
+          This developer preview is not yet Developer ID signed or notarized.
+          macOS may ask you to confirm the first launch.
         </p>
         <InstallGuide />
         <a className="button button-signal" href={downloadUrl}>

@@ -8,11 +8,18 @@ open "/Applications/MicAway.app"`;
 
 export function InstallGuide() {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   const copyCommand = async () => {
-    await navigator.clipboard.writeText(installCommand);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    try {
+      await navigator.clipboard.writeText(installCommand);
+      setCopyError(false);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+      setCopyError(true);
+    }
   };
 
   return (
@@ -66,7 +73,13 @@ export function InstallGuide() {
             <div className="terminal-command">
               <div className="terminal-toolbar">
                 <span>Terminal</span>
-                <button onClick={copyCommand} type="button">
+                <button
+                  aria-label={
+                    copied ? "Commands copied" : "Copy Terminal commands"
+                  }
+                  onClick={copyCommand}
+                  type="button"
+                >
                   {copied ? (
                     <Check aria-hidden="true" />
                   ) : (
@@ -79,6 +92,11 @@ export function InstallGuide() {
                 <code>{installCommand}</code>
               </pre>
             </div>
+            <output className="copy-feedback">
+              {copyError &&
+                "Could not copy. Select the commands above and copy them manually."}
+              {copied && "Commands copied."}
+            </output>
             <p className="security-warning">
               This removes quarantine metadata from MicAway only. Never run it
               against Applications, Downloads, or a wildcard.

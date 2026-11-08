@@ -49,11 +49,12 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 52px;
-  padding: 0 clamp(20px, 4vw, 48px);
+  max-width: 1080px;
+  min-height: 64px;
+  padding: 0 24px;
+  margin: 0 auto;
   font-size: 14px;
-  background: color-mix(in srgb, var(--paper-bright) 86%, transparent);
-  backdrop-filter: blur(16px);
+  background: var(--paper-bright);
 }
 
 .wordmark {
@@ -87,8 +88,11 @@ button {
 }
 
 .nav-download {
-  padding: 6px 14px;
-  font-weight: 580;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  font-weight: 600;
   color: white;
   background: var(--ink);
   border-radius: 999px;
@@ -96,16 +100,17 @@ button {
 
 .hero {
   width: min(100%, 920px);
-  padding: clamp(48px, 7vw, 88px) 24px 32px;
+  padding: clamp(24px, 3vw, 40px) 24px 0;
   margin: 0 auto;
   text-align: center;
+  scroll-margin-top: 72px;
 }
 
 .hero-icon {
   display: block;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 22px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
 }
 
 .hero-name,
@@ -115,9 +120,9 @@ button {
 
 .hero-name {
   margin-bottom: 14px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 
 .install-icon {
@@ -128,13 +133,14 @@ button {
 }
 
 .hero h1,
+.control-section h2,
 .how-section h2,
 .workflow-shift h2,
 .trust-section h2,
 .install-section h2 {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(2.35rem, 6vw, 4rem);
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(2.35rem, 5vw, 3.75rem);
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: -0.045em;
@@ -145,17 +151,19 @@ button {
 .install-note {
   max-width: 34rem;
   margin: 18px auto 0;
-  font-size: clamp(1.05rem, 3.4vw, 1.25rem);
+  font-size: clamp(1rem, 2vw, 1.125rem);
   line-height: 1.5;
   color: var(--muted);
   text-wrap: pretty;
 }
 
 .hero-meta {
-  margin: 16px 0 0;
-  font-size: 14px;
-  color: var(--muted);
+  min-height: 21px;
+  margin: 14px 0 0;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  line-height: 21px;
+  color: var(--muted);
 }
 
 .hero-actions {
@@ -164,7 +172,7 @@ button {
   gap: 18px;
   align-items: center;
   justify-content: center;
-  margin-top: 28px;
+  margin-top: 22px;
 }
 
 .button {
@@ -209,19 +217,19 @@ button {
 }
 
 .attention-demo {
-  width: min(100%, 860px);
-  margin: 56px auto 0;
+  width: min(100%, 800px);
+  margin: 30px auto 0;
 }
 
 .scene {
   position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  touch-action: none;
+  touch-action: pan-y;
   cursor: grab;
   user-select: none;
   background: #eceae6;
-  border-radius: 22px;
+  border-radius: 16px;
 }
 
 .scene:active {
@@ -237,8 +245,6 @@ button {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transform-origin: 38% 48%;
-  will-change: opacity, transform, filter;
 }
 
 .scene-photo img {
@@ -270,151 +276,23 @@ button {
   inset: 0;
 }
 
-.scene-card {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  z-index: 2;
-  width: min(248px, calc(100% - 32px));
-  padding: 14px 16px 12px;
-  text-align: left;
-  color: white;
-  background: rgba(18, 18, 18, 0.78);
-  border-radius: 18px;
-  box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.08),
-    0 18px 40px rgba(0, 0, 0, 0.32);
-  backdrop-filter: blur(22px) saturate(1.35);
-}
-
-.scene-card span {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.scene-card span > i {
-  width: 8px;
-  height: 8px;
-  background: #7a7a76;
-  border-radius: 50%;
-}
-
-.scene-card span > i.is-live {
-  background: #3dce7a;
-  box-shadow: 0 0 0 4px rgba(61, 206, 122, 0.18);
-}
-
-.scene-card code {
-  margin-left: auto;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
-}
-
-.scene-card strong {
-  display: block;
-  margin-top: 10px;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-}
-
-.is-aside .scene-card strong {
-  color: rgba(255, 255, 255, 0.48);
-}
-
-.scene-card small {
-  display: block;
-  margin-top: 4px;
-  font-size: 14px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.hud-bars {
-  display: flex;
-  gap: 3px;
-  align-items: flex-end;
-  height: 18px;
-  margin-top: 12px;
-}
-
-.hud-bars i {
-  width: 3px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.22);
-  border-radius: 99px;
-  transform-origin: center bottom;
-}
-
-.is-listening .hud-bars i {
-  background: #7ee0a8;
-  animation: hud-bar 1.05s ease-in-out infinite;
-}
-
-.is-listening .hud-bars i:nth-child(1) {
-  animation-delay: 0s;
-  height: 6px;
-}
-.is-listening .hud-bars i:nth-child(2) {
-  animation-delay: 0.08s;
-  height: 11px;
-}
-.is-listening .hud-bars i:nth-child(3) {
-  animation-delay: 0.16s;
-  height: 16px;
-}
-.is-listening .hud-bars i:nth-child(4) {
-  animation-delay: 0.04s;
-  height: 9px;
-}
-.is-listening .hud-bars i:nth-child(5) {
-  animation-delay: 0.2s;
-  height: 14px;
-}
-.is-listening .hud-bars i:nth-child(6) {
-  animation-delay: 0.12s;
-  height: 7px;
-}
-.is-listening .hud-bars i:nth-child(7) {
-  animation-delay: 0.18s;
-  height: 15px;
-}
-.is-listening .hud-bars i:nth-child(8) {
-  animation-delay: 0.06s;
-  height: 10px;
-}
-.is-listening .hud-bars i:nth-child(9) {
-  animation-delay: 0.14s;
-  height: 5px;
-}
-
-@keyframes hud-bar {
-  0%,
-  100% {
-    transform: scaleY(0.45);
-  }
-  50% {
-    transform: scaleY(1);
-  }
-}
-
 .attention-status {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 18px 0 0;
-  font-size: 15px;
-  line-height: 1.4;
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .attention-status strong {
-  font-size: 21px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 
 .attention-status span {
@@ -427,16 +305,16 @@ button {
   gap: 3px;
   width: min(100%, 320px);
   padding: 3px;
-  margin: 22px auto 0;
+  margin: 12px auto 0;
   background: #ecebe7;
   border-radius: 12px;
 }
 
 .attention-toggle button {
-  min-height: 38px;
+  min-height: 44px;
   font-size: 14px;
   font-weight: 580;
-  color: var(--muted);
+  color: #62625d;
   cursor: pointer;
   background: transparent;
   border: 0;
@@ -460,7 +338,7 @@ button {
 .trust-section,
 .install-section {
   width: min(100%, 1080px);
-  padding: clamp(72px, 10vw, 120px) 24px;
+  padding: clamp(64px, 8vw, 96px) 24px;
   margin: 0 auto;
   text-align: center;
 }
@@ -470,16 +348,17 @@ button {
 .control-section h2,
 .trust-section h2,
 .install-section h2 {
-  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-size: clamp(2rem, 4vw, 2.75rem);
 }
 
 .setup-gallery {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px;
-  align-items: stretch;
-  margin-top: 48px;
+  gap: 24px;
+  padding: 0;
+  margin: 36px 0 0;
   text-align: left;
+  list-style: none;
 }
 
 .how-flow {
@@ -489,8 +368,8 @@ button {
   max-width: 880px;
   padding: 0;
   margin: 56px auto 0;
-  list-style: none;
   text-align: center;
+  list-style: none;
 }
 
 .how-flow li {
@@ -553,24 +432,24 @@ button {
 }
 
 .how-bars i:nth-child(1) {
-  animation-delay: 0s;
   height: 6px;
+  animation-delay: 0s;
 }
 .how-bars i:nth-child(2) {
-  animation-delay: 0.1s;
   height: 12px;
+  animation-delay: 0.1s;
 }
 .how-bars i:nth-child(3) {
-  animation-delay: 0.18s;
   height: 16px;
+  animation-delay: 0.18s;
 }
 .how-bars i:nth-child(4) {
-  animation-delay: 0.06s;
   height: 9px;
+  animation-delay: 0.06s;
 }
 .how-bars i:nth-child(5) {
-  animation-delay: 0.14s;
   height: 7px;
+  animation-delay: 0.14s;
 }
 
 .how-bars-spacer {
@@ -595,28 +474,29 @@ button {
 .setup-step {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  height: 100%;
+  gap: 20px;
+  min-width: 0;
 }
 
 .menu-shot {
   display: flex;
-  flex: 1;
   align-items: center;
   justify-content: center;
-  padding: 18px 16px 20px;
+  padding: 12px;
   background: #eceae6;
-  border-radius: 18px;
+  border-radius: 12px;
 }
 
 .menu-shot img {
+  display: block;
   width: 100%;
+  max-width: 356px;
   height: auto;
 }
 
 .menu-shot-embed {
-  flex: 0 0 auto;
-  margin-top: 8px;
+  width: min(100%, 380px);
+  margin: 0;
 }
 
 .app-shot {
@@ -783,7 +663,8 @@ button {
 }
 
 .setup-caption {
-  min-height: 6.5rem;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
 .setup-caption h3 {
@@ -803,7 +684,6 @@ button {
 }
 
 .setup-caption p {
-  min-height: 3.2em;
   margin: 8px 0 0;
   font-size: 15px;
   line-height: 1.5;
@@ -812,25 +692,26 @@ button {
 
 .workflow-shift {
   padding-top: 0;
+  padding-bottom: clamp(64px, 8vw, 96px);
 }
 
 .app-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 32px;
+  gap: 20px 28px;
   align-items: center;
   justify-content: center;
-  margin-top: 36px;
+  margin-top: 32px;
 }
 
 .app-chip {
   display: inline-flex;
-  gap: 12px;
+  gap: 9px;
   align-items: center;
 }
 
 .app-chip:hover {
-  opacity: 0.7;
+  color: var(--ink);
 }
 
 .app-logo {
@@ -867,7 +748,7 @@ button {
   object-fit: cover;
 }
 
-.app-chip h3 {
+.app-chip span {
   margin: 0;
   font-size: 17px;
   font-weight: 600;
@@ -881,19 +762,23 @@ button {
 }
 
 .secondary-use {
-  margin-top: 28px;
+  max-width: 38rem;
+  margin: 24px auto 0;
   font-size: 15px;
+  line-height: 1.6;
   color: var(--muted);
 }
 
 .trademark-note {
-  margin-top: 20px;
-  font-size: 13px;
+  max-width: 44rem;
+  margin: 16px auto 0;
+  font-size: 12px;
+  line-height: 1.6;
   color: var(--muted);
 }
 
 .control-section {
-  padding-top: 12px;
+  padding-top: 0;
 }
 
 .control-intro {
@@ -906,40 +791,42 @@ button {
 
 .control-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 40px;
   margin-top: 40px;
   text-align: left;
 }
 
 .control-card {
-  padding: clamp(24px, 5vw, 40px);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
+  padding: 32px 0 0;
+  border-top: 1px solid var(--line);
 }
 
 .control-kicker {
   font-size: 12px;
-  font-weight: 700;
-  color: var(--signal);
+  font-weight: 600;
+  color: #287f50;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .control-card h3 {
-  max-width: 18rem;
+  max-width: 22rem;
   margin: 12px 0 0;
-  font-size: clamp(1.55rem, 3vw, 2rem);
-  line-height: 1.15;
-  letter-spacing: -0.04em;
+  font-size: clamp(1.5rem, 3vw, 1.875rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
 }
 
 .control-card p {
-  max-width: 28rem;
-  margin: 14px 0 28px;
-  font-size: 15px;
-  line-height: 1.55;
+  max-width: 27rem;
+  margin: 16px 0 0;
+  font-size: 16px;
+  line-height: 1.65;
   color: var(--muted);
 }
 
@@ -1010,8 +897,8 @@ button {
   justify-content: center;
   padding: 0;
   margin: 16px 0 0;
-  font-size: clamp(1.05rem, 3.4vw, 1.25rem);
-  color: var(--muted);
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  color: var(--ink);
   list-style: none;
 }
 
@@ -1042,7 +929,7 @@ button {
 
 .install-steps > li {
   display: grid;
-  grid-template-columns: 34px 1fr;
+  grid-template-columns: 28px minmax(0, 1fr);
   gap: 14px;
   padding: 22px 0;
   border-bottom: 1px solid var(--line);
@@ -1067,8 +954,8 @@ button {
 
 .install-steps p {
   margin: 6px 0 0;
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--muted);
 }
 
@@ -1161,8 +1048,9 @@ button {
   display: inline-flex;
   gap: 6px;
   align-items: center;
-  padding: 5px;
-  font-size: 11px;
+  min-height: 44px;
+  padding: 8px;
+  font-size: 12px;
   color: #c8c8c2;
   cursor: pointer;
   background: transparent;
@@ -1186,9 +1074,10 @@ button {
 .terminal-command pre {
   padding: 17px;
   margin: 0;
-  overflow-x: auto;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .terminal-command code {
@@ -1197,8 +1086,8 @@ button {
 
 .install-steps .security-warning {
   margin-top: 10px;
-  font-size: 12px;
-  color: #85621f;
+  font-size: 13px;
+  color: #78551b;
 }
 
 .permission-guide {
@@ -1253,8 +1142,8 @@ footer {
   }
 
   .how-flow {
-    gap: 28px;
     grid-template-columns: 1fr;
+    gap: 28px;
     max-width: 320px;
   }
 
@@ -1276,8 +1165,8 @@ footer {
   }
 
   .hero-icon {
-    width: 96px;
-    height: 96px;
+    width: 56px;
+    height: 56px;
   }
 
   .control-grid {
@@ -1309,5 +1198,308 @@ footer {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Small, functional refinements shared by the landing page. */
+:where(a, button, [role="slider"]):focus-visible {
+  outline: 2px solid #287f50;
+  outline-offset: 4px;
+}
+:where(a, button) {
+  scroll-margin-block: 80px;
+  -webkit-tap-highlight-color: transparent;
+}
+:where(.button, .nav-download, .attention-toggle button, .text-link) {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+.button:hover,
+.nav-download:hover {
+  transform: translateY(-1px);
+}
+.button:active,
+.nav-download:active {
+  transform: translateY(1px);
+}
+.wordmark,
+.nav-actions > a,
+.text-link {
+  min-height: 44px;
+}
+.nav-actions > a {
+  display: inline-flex;
+  align-items: center;
+}
+.skip-link {
+  position: fixed;
+  top: -80px;
+  left: 24px;
+  z-index: 50;
+  padding: 12px 18px;
+  color: white;
+  background: var(--ink);
+  border-radius: 8px;
+}
+.skip-link:focus {
+  top: 12px;
+}
+html:focus-within {
+  scroll-behavior: auto;
+}
+.hero h1 {
+  text-wrap: balance;
+}
+.hero-copy {
+  max-width: 31rem;
+}
+.hero-requirements {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.attention-status i {
+  width: 7px;
+  height: 7px;
+  background: #777772;
+  border-radius: 50%;
+}
+.is-listening .attention-status i {
+  background: #287f50;
+}
+.demo-hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.scene-menu img {
+  transition: opacity 240ms ease-in-out;
+}
+
+.scene-menu img:first-child {
+  opacity: 1;
+}
+
+.call-app-logo {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.setup-caption .step-number {
+  margin-right: 4px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.workflow-shift h2 {
+  font-size: clamp(1.6rem, 3vw, 2rem);
+}
+.trust-section {
+  padding-top: 24px;
+  padding-bottom: 64px;
+}
+.trust-points {
+  gap: 12px 28px;
+  margin-top: 24px;
+  font-weight: 500;
+}
+.install-section {
+  border-top: 1px solid var(--line);
+}
+.install-note {
+  max-width: 34rem;
+}
+.install-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 18px;
+}
+.install-steps > li > div {
+  min-width: 0;
+}
+.copy-feedback {
+  min-height: 0;
+}
+.copy-feedback:empty {
+  display: none;
+}
+footer {
+  max-width: 1080px;
+  padding: 24px;
+  margin: 0 auto;
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 641px) and (max-width: 860px) {
+  .scene {
+    aspect-ratio: 16 / 9;
+  }
+  .setup-gallery {
+    gap: 24px;
+    max-width: none;
+  }
+  .setup-step {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 28px;
+    align-items: center;
+  }
+  .setup-caption {
+    padding: 0;
+    border: 0;
+  }
+  .control-card {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 28px;
+  }
+}
+@media (max-width: 640px) {
+  .app-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 12px;
+    max-width: 340px;
+    margin-right: auto;
+    margin-left: auto;
+    text-align: left;
+  }
+
+  .app-chip {
+    min-width: 0;
+  }
+
+  .app-chip:last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  .app-chip span {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .site-nav {
+    min-height: 60px;
+    padding: 0 20px;
+  }
+  .nav-actions {
+    gap: 16px;
+  }
+  .hero {
+    padding: 20px 20px 0;
+  }
+  .hero-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+  }
+  .hero-name {
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .hero h1 {
+    font-size: clamp(2.1rem, 9.5vw, 2.65rem);
+  }
+  .hero-copy {
+    margin-top: 14px;
+    font-size: 16px;
+  }
+  .hero-actions {
+    flex-direction: row;
+    gap: 10px 18px;
+    margin-top: 18px;
+  }
+  .hero-actions .button {
+    width: 100%;
+  }
+  .hero-actions .text-link {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .hero-meta {
+    margin-top: 8px;
+  }
+  .attention-demo {
+    margin-top: 22px;
+  }
+  .scene {
+    border-radius: 12px;
+  }
+  .scene-menu {
+    right: 4px;
+    bottom: 4px;
+    width: 46%;
+  }
+  .attention-status strong {
+    font-size: 16px;
+  }
+  .demo-hint {
+    max-width: 17rem;
+    margin-right: auto;
+    margin-left: auto;
+  }
+  .setup-gallery {
+    gap: 32px;
+    margin-top: 28px;
+  }
+  .setup-step {
+    gap: 14px;
+  }
+  .setup-caption {
+    padding-top: 12px;
+  }
+  .setup-caption h3 {
+    font-size: 18px;
+  }
+  .how-section,
+  .workflow-shift,
+  .control-section,
+  .trust-section,
+  .install-section {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+  .control-card {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-top: 24px;
+  }
+  .control-card h3 {
+    max-width: 19rem;
+  }
+  .menu-shot-embed {
+    margin: 0 auto;
+  }
+  .trust-points {
+    gap: 10px;
+  }
+  .install-guide {
+    margin-top: 28px;
+  }
+  .install-steps > li {
+    gap: 10px;
+  }
+  .settings-guide-content {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+  .settings-guide-content b {
+    justify-self: start;
+  }
+  .terminal-command pre {
+    padding: 12px;
+    font-size: 12px;
+  }
+  .install-section > .button {
+    width: 100%;
+    max-width: 340px;
+  }
+  footer {
+    flex-direction: row;
+    align-items: center;
+    padding: 20px;
   }
 }

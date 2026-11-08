@@ -1,0 +1,59 @@
+[
+  {
+    "file": "google-meet.svg",
+    "icon": "logos:google-meet-2020",
+    "name": "Google Meet",
+    "kind": "colour",
+    "source": "gilbarbara/logos@d6960edc1b7309d392c76e40d3a320df7f9ff85c",
+    "author": "Gil Barbara",
+    "licence": "CC0-1.0",
+    "url": "https://github.com/gilbarbara/logos",
+    "trademark": true,
+    "markUrl": "https://meet.google.com/"
+  },
+  {
+    "file": "slack.svg",
+    "icon": "logos:slack-icon",
+    "name": "Slack",
+    "kind": "colour",
+    "source": "gilbarbara/logos@d6960edc1b7309d392c76e40d3a320df7f9ff85c",
+    "author": "Gil Barbara",
+    "licence": "CC0-1.0",
+    "url": "https://github.com/gilbarbara/logos",
+    "trademark": true,
+    "markUrl": "https://slack.com/"
+  },
+  {
+    "file": "teams.svg",
+    "icon": "logos:microsoft-teams",
+    "name": "Microsoft Teams",
+    "kind": "colour",
+    "source": "gilbarbara/logos@d6960edc1b7309d392c76e40d3a320df7f9ff85c",
+    "author": "Gil Barbara",
+    "licence": "CC0-1.0",
+    "url": "https://github.com/gilbarbara/logos",
+    "trademark": true,
+    "markUrl": "https://teams.com/"
+  },
+  {
+    "file": "zoom.svg",
+    "icon": "logos:zoom-icon",
+    "name": "Zoom",
+    "kind": "colour",
+    "source": "gilbarbara/logos@d6960edc1b7309d392c76e40d3a320df7f9ff85c",
+    "author": "Gil Barbara",
+    "licence": "CC0-1.0",
+    "url": "https://github.com/gilbarbara/logos",
+    "trademark": true,
+    "markUrl": "https://zoom.us/"
+  },
+  {
+    "file": "facetime.png",
+    "name": "FaceTime",
+    "source": "macOS FaceTime.app/Contents/Resources/AppIcon.icns",
+    "author": "Apple Inc.",
+    "licence": "Apple proprietary app icon; used to identify compatibility.",
+    "trademark": true,
+    "markUrl": "https://www.apple.com/facetime/"
+  }
+]
